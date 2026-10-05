@@ -15,6 +15,9 @@
 </p>
 <p align="center"><i>Canvas allocations for robot manipulation, computer use, and multi-robot control. Each colored block is a modality region on the 3D spatiotemporal grid.</i></p>
 
+<p align="center"><a href="presentation/animations/canvas_attention.mp4"><img src="assets/canvas_attention_poster.jpg" alt="Packed canvas slices for three MuJoCo robots, with attention arcs from the newest slice into earlier blocks" width="100%"></a></p>
+<p align="center"><i>Video (2 min): from one transformer, to two attending to each other's internal states, to a swarm on one canvas. Three MuJoCo mobile manipulators share a 20×48 canvas; arcs are real softmax(QKᵀ/√d) scores from a randomly initialised, untrained canvas DiT. Interactive version and the full pipeline (sim → canvas DiT → export) in <a href="presentation/animations/">presentation/animations/</a>.</i></p>
+
 ---
 
 ## The idea
