@@ -1,0 +1,4123 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Prompt engineering, but for latent space. A type system for multimodal latent dynamics.">
+      
+      
+      
+        <link rel="canonical" href="https://jacobfv.github.io/canvas-engineering/design/canvas-types-spec/">
+      
+      
+        <link rel="prev" href="../v2-spec/">
+      
+      
+        <link rel="next" href="../../research/results/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Canvas Types Spec - canvas-engineering</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="deep-purple">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#canvas-types-detailed-design-specification" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="canvas-engineering" class="md-header__button md-logo" aria-label="canvas-engineering" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            canvas-engineering
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Canvas Types Spec
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="deep-purple"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="deep-purple"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/JacobFV/canvas-engineering" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    JacobFV/canvas-engineering
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="canvas-engineering" class="md-nav__button md-logo" aria-label="canvas-engineering" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    canvas-engineering
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/JacobFV/canvas-engineering" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    JacobFV/canvas-engineering
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Concepts
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Concepts
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/canvas/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The Canvas
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/canvas-types/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Canvas Types
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/program-layer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Program Layer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/carriers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Carriers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/topology/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Topology
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/attention-functions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Attention Functions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/semantic-types/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Semantic Types
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/looped-attention/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Looped Attention
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Examples
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Examples
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/01-hello-types/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    01: Hello Types
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/02-multi-frequency/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    02: Multi-Frequency Fusion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/03-cartpole/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    03: CartPole Control
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/04-vehicle-fleet/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    04: Vehicle Fleet
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/05-protein-complex/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    05: Protein Complex
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/06-air-traffic/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    06: Air Traffic
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/07-hospital-icu/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    07: Hospital ICU
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/08-minecraft-world-model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    08: Minecraft World Model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/09-bci/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    09: BCI Neural Decoding
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/09b-bci-tribe/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    09b: BCI + TRIBE v2
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/10-fusion-reactor/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    10: Fusion Reactor
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/11-mars-colony/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    11: Mars Colony
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/14-saccading-vision/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    14: Saccading Vision
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/15-world-model-carriers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    15: World Model Carriers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/16-memory-consolidation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    16: Memory Consolidation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/17-graph-parser/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    17: Graph Parser
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/18-sparse-reflection/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    18: Sparse Reflection
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/19-cortical-dynamics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    19: Cortical Dynamics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design Recipes
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Design Recipes
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../recipes/robot/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Robot Manipulation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../recipes/computer-use/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Computer Use Agent
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../recipes/multi-agent/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Multi-Agent
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../recipes/custom/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Custom Architectures
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/canvas/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    canvas
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/connectivity/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    connectivity
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/program/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    program
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/clock_ir/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    clock_ir
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/dispatch/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    dispatch
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/residuals/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    residuals
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/scheduling/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    scheduling
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/learning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    learning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/compiler/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    compiler
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/cortex/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    cortex
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/identity/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    identity
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/masks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    masks
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/schema/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    schema
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/types/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    types
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/looped_block/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    looped_block
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/graft/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    graft
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Design
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Design
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../v2-spec/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    v2 Spec
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Canvas Types Spec
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Canvas Types Spec
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-problem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Problem
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-core-abstraction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Core Abstraction
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-field-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Field Types
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Field Types">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-vec-atomic-latent-region" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Vec — atomic latent region
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-canvastype-composite-struct" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 CanvasType — composite struct
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-array-replicated-substructure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 Array — replicated substructure
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-scalar-single-position-field" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4 Scalar — single-position field
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#35-shared-aliased-field-union-type" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.5 Shared — aliased field (union type)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-addressing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Addressing
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-layout-strategies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Layout Strategies
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Layout Strategies">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-packed-default" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 Packed (default)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-interleaved-field-affinity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 Interleaved (field-affinity)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-mirrored-overlapping-union" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 Mirrored (overlapping / union)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#54-per-instance-instance-affinity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.4 Per-instance (instance-affinity)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#55-hybrid-user-specified" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.5 Hybrid / User-specified
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-connectivity-policies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Connectivity Policies
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Connectivity Policies">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-intra-type-policy-fields-within-a-type" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 Intra-type policy (fields within a type)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62-parent-child-policy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2 Parent-child policy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#63-array-element-policy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.3 Array element policy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#64-cross-level-policy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.4 Cross-level policy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#65-temporal-policy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.5 Temporal policy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#66-explicit-overrides" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.6 Explicit overrides
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-compilation-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Compilation Pipeline
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. Compilation Pipeline">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-flatten" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Flatten
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-size-computation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Size computation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-packing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Packing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-4-regionspec-generation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: RegionSpec generation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-5-connectivity-generation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5: Connectivity generation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-6-assembly" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 6: Assembly
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-the-compile-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. The Compile API
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-worked-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Worked Examples
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9. Worked Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#91-multi-robot-cell" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.1 Multi-Robot Cell
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#92-company-interleaved-layout" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.2 Company (interleaved layout)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#93-hierarchical-organization-recursive-nesting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.3 Hierarchical Organization (recursive nesting)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#94-the-layout-strategy-comparison" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.4 The Layout Strategy Comparison
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-interaction-with-existing-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Interaction with Existing API
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-type-compatibility-and-transfer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Type Compatibility and Transfer
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#12-what-this-does-not-do" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12. What This Does NOT Do
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#13-open-questions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13. Open Questions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#14-module-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14. Module Structure
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#15-why-same-repo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        15. Why Same Repo
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Research
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Research
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../research/results/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Empirical Results
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../research/brain-world-model/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Brain World Model
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../research/session-log/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Session Log
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../research/type-system/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The Type System Thesis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-problem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Problem
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-core-abstraction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Core Abstraction
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-field-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Field Types
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Field Types">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-vec-atomic-latent-region" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Vec — atomic latent region
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-canvastype-composite-struct" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 CanvasType — composite struct
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-array-replicated-substructure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 Array — replicated substructure
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-scalar-single-position-field" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4 Scalar — single-position field
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#35-shared-aliased-field-union-type" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.5 Shared — aliased field (union type)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-addressing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Addressing
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-layout-strategies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Layout Strategies
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Layout Strategies">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-packed-default" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 Packed (default)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-interleaved-field-affinity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 Interleaved (field-affinity)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-mirrored-overlapping-union" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 Mirrored (overlapping / union)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#54-per-instance-instance-affinity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.4 Per-instance (instance-affinity)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#55-hybrid-user-specified" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.5 Hybrid / User-specified
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-connectivity-policies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Connectivity Policies
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Connectivity Policies">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-intra-type-policy-fields-within-a-type" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 Intra-type policy (fields within a type)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62-parent-child-policy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2 Parent-child policy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#63-array-element-policy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.3 Array element policy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#64-cross-level-policy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.4 Cross-level policy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#65-temporal-policy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.5 Temporal policy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#66-explicit-overrides" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.6 Explicit overrides
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-compilation-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Compilation Pipeline
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. Compilation Pipeline">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-flatten" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Flatten
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-size-computation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Size computation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-packing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Packing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-4-regionspec-generation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: RegionSpec generation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-5-connectivity-generation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 5: Connectivity generation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-6-assembly" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 6: Assembly
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-the-compile-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. The Compile API
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-worked-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Worked Examples
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9. Worked Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#91-multi-robot-cell" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.1 Multi-Robot Cell
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#92-company-interleaved-layout" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.2 Company (interleaved layout)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#93-hierarchical-organization-recursive-nesting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.3 Hierarchical Organization (recursive nesting)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#94-the-layout-strategy-comparison" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.4 The Layout Strategy Comparison
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-interaction-with-existing-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Interaction with Existing API
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-type-compatibility-and-transfer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Type Compatibility and Transfer
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#12-what-this-does-not-do" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12. What This Does NOT Do
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#13-open-questions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13. Open Questions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#14-module-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14. Module Structure
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#15-why-same-repo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        15. Why Same Repo
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="canvas-types-detailed-design-specification">Canvas Types: Detailed Design Specification<a class="headerlink" href="#canvas-types-detailed-design-specification" title="Permanent link">&para;</a></h1>
+<p><strong>Status</strong>: Implemented (v0.2.0). Extended by <a href="../v2-spec/">v2 program layer</a>.
+<strong>Module</strong>: <code>canvas_engineering.types</code>
+<strong>Compilation target</strong>: <code>CanvasLayout</code> + <code>CanvasTopology</code> → <code>CanvasSchema</code> (v1), <code>CanvasProgram</code> (v2)</p>
+<hr />
+<h2 id="1-problem">1. Problem<a class="headerlink" href="#1-problem" title="Permanent link">&para;</a></h2>
+<p>Today, canvas-engineering is a memory layout tool with manual wiring. You hand-specify
+region bounds, hand-wire connections, hand-tune loss weights. This is like writing
+assembly: full control, zero abstraction.</p>
+<p>The insight: real-world systems have <strong>compositional structure</strong> — agents contain
+subsystems, organizations contain agents, multi-robot cells contain robots. This
+structure implies natural connectivity patterns, allocation proportions, and
+information flow. Currently the user is the compiler: they see "Company with 10
+Employees" and manually translate that into 30+ RegionSpecs and 100+ Connections.</p>
+<p>Canvas Types is the compiler.</p>
+<h2 id="2-core-abstraction">2. Core Abstraction<a class="headerlink" href="#2-core-abstraction" title="Permanent link">&para;</a></h2>
+<p>A <strong>CanvasType</strong> is a declarative struct whose fields are latent regions. Types
+compose (nesting), specialize (inheritance), and replicate (arrays). A compiler
+flattens any CanvasType into a <code>CanvasSchema</code> — a concrete <code>CanvasLayout</code> +
+<code>CanvasTopology</code> ready for the diffusion process.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>CanvasType (high-level)
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    ↓ compile()
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>CanvasSchema (mid-level)
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    ↓ contains
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>CanvasLayout + CanvasTopology (low-level)
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    ↓ produces
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>attention masks, loss weights, frame maps (runtime)
+</code></pre></div>
+<p>Users pick their level. The low-level API doesn't change.</p>
+<h2 id="3-field-types">3. Field Types<a class="headerlink" href="#3-field-types" title="Permanent link">&para;</a></h2>
+<h3 id="31-vec-atomic-latent-region">3.1 Vec — atomic latent region<a class="headerlink" href="#31-vec-atomic-latent-region" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">canvas_engineering.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">Vec</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="k">class</span><span class="w"> </span><span class="nc">Robot</span><span class="p">(</span><span class="n">CanvasType</span><span class="p">):</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>    <span class="n">camera</span><span class="p">:</span> <span class="n">Vec</span><span class="p">[</span><span class="mi">144</span><span class="p">]</span>              <span class="c1"># 144 latent positions</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    <span class="n">joints</span><span class="p">:</span> <span class="n">Vec</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span>                <span class="c1"># 8 positions</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>    <span class="n">action</span><span class="p">:</span> <span class="n">Vec</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span>                <span class="c1"># 8 positions</span>
+</code></pre></div>
+<p><code>Vec[N]</code> declares a field that occupies N latent positions. Vec is parameterized:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">Vec</span><span class="p">[</span><span class="n">N</span><span class="p">]</span>                            <span class="c1"># N positions, all defaults</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="n">Vec</span><span class="p">[</span><span class="n">N</span><span class="p">]</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="n">period</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>                     <span class="c1"># temporal frequency</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="n">is_output</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>              <span class="c1"># input-only conditioning</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>    <span class="n">loss_weight</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span>              <span class="c1"># emphasized in loss</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>    <span class="n">attn</span><span class="o">=</span><span class="s2">"linear_attention"</span><span class="p">,</span>      <span class="c1"># default attention type</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>    <span class="n">semantic_type</span><span class="o">=</span><span class="s2">"RGB video"</span><span class="p">,</span>    <span class="c1"># modality description</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="p">)</span>
+</code></pre></div>
+<p>Each configured Vec compiles to one <code>RegionSpec</code>. The bounds are computed by the
+packing algorithm — the user doesn't specify them.</p>
+<h3 id="32-canvastype-composite-struct">3.2 CanvasType — composite struct<a class="headerlink" href="#32-canvastype-composite-struct" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">Agent</span><span class="p">(</span><span class="n">CanvasType</span><span class="p">):</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    <span class="n">thought</span><span class="p">:</span> <span class="n">Vec</span><span class="p">[</span><span class="mi">64</span><span class="p">]</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    <span class="n">goal</span><span class="p">:</span> <span class="n">Vec</span><span class="p">[</span><span class="mi">32</span><span class="p">]</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="k">class</span><span class="w"> </span><span class="nc">Employee</span><span class="p">(</span><span class="n">Agent</span><span class="p">):</span>            <span class="c1"># inherits thought, goal</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>    <span class="n">role</span><span class="p">:</span> <span class="n">Vec</span><span class="p">[</span><span class="mi">16</span><span class="p">]</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="k">class</span><span class="w"> </span><span class="nc">Product</span><span class="p">(</span><span class="n">CanvasType</span><span class="p">):</span>
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>    <span class="n">description</span><span class="p">:</span> <span class="n">Vec</span><span class="p">[</span><span class="mi">48</span><span class="p">]</span>
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>    <span class="n">features</span><span class="p">:</span> <span class="n">Vec</span><span class="p">[</span><span class="mi">24</span><span class="p">]</span>
+<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>
+<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="k">class</span><span class="w"> </span><span class="nc">Company</span><span class="p">(</span><span class="n">Agent</span><span class="p">):</span>             <span class="c1"># inherits thought, goal</span>
+<a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a>    <span class="n">employees</span><span class="p">:</span> <span class="n">Array</span><span class="p">[</span><span class="n">Employee</span><span class="p">,</span> <span class="mi">10</span><span class="p">]</span>
+<a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a>    <span class="n">products</span><span class="p">:</span> <span class="n">Array</span><span class="p">[</span><span class="n">Product</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span>
+</code></pre></div>
+<p>A CanvasType is a frozen declaration. Fields are ordered (insertion order). Inherited
+fields come first (MRO). The type is not a runtime object — it's a schema that
+compiles to canvas primitives.</p>
+<h3 id="33-array-replicated-substructure">3.3 Array — replicated substructure<a class="headerlink" href="#33-array-replicated-substructure" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">Array</span><span class="p">[</span><span class="n">Employee</span><span class="p">,</span> <span class="mi">10</span><span class="p">]</span>               <span class="c1"># 10 Employee instances</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="n">Array</span><span class="p">[</span><span class="n">Robot</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>    <span class="n">layout</span><span class="o">=</span><span class="n">ArrayLayout</span><span class="o">.</span><span class="n">INTERLEAVED</span><span class="p">,</span>  <span class="c1"># see Section 5</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>    <span class="n">element_connectivity</span><span class="o">=</span><span class="s2">"isolated"</span><span class="p">,</span>  <span class="c1"># elements don't see each other</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="p">)</span>
+</code></pre></div>
+<p>An array creates K instances of a type, each with independent latent positions.
+The key design decision is <strong>how</strong> these instances are laid out on the grid and
+<strong>how</strong> they connect — see Section 5.</p>
+<h3 id="34-scalar-single-position-field">3.4 Scalar — single-position field<a class="headerlink" href="#34-scalar-single-position-field" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">Robot</span><span class="p">(</span><span class="n">CanvasType</span><span class="p">):</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>    <span class="n">reward</span><span class="p">:</span> <span class="n">Scalar</span>                <span class="c1"># 1 position — sugar for Vec[1]</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>    <span class="n">done</span><span class="p">:</span> <span class="n">Scalar</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="n">is_output</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="35-shared-aliased-field-union-type">3.5 Shared — aliased field (union type)<a class="headerlink" href="#35-shared-aliased-field-union-type" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">MultiAgent</span><span class="p">(</span><span class="n">CanvasType</span><span class="p">):</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>    <span class="n">shared_state</span><span class="p">:</span> <span class="n">Shared</span><span class="p">[</span><span class="n">Vec</span><span class="p">[</span><span class="mi">64</span><span class="p">]]</span>    <span class="c1"># all referencing types write to same positions</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>    <span class="n">agent_a</span><span class="p">:</span> <span class="n">AgentType</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>    <span class="n">agent_b</span><span class="p">:</span> <span class="n">AgentType</span>
+</code></pre></div>
+<p>A <code>Shared</code> field occupies positions that multiple children co-inhabit. This is a
+union in C terms — overlapping memory. The diffusion process reads and writes
+the same latent positions from multiple semantic perspectives. Radical, but
+it's exactly how shared state works in multi-agent latent spaces.</p>
+<h2 id="4-addressing">4. Addressing<a class="headerlink" href="#4-addressing" title="Permanent link">&para;</a></h2>
+<p>Compiled schemas use dotted paths for region names:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>"company.thought"                 # Company's own thought field
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>"company.goal"                    # Company's own goal field
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>"company.employees[0].thought"    # First employee's thought
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>"company.employees[3].role"       # Fourth employee's role
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>"company.products[*].description" # Wildcard: all products' descriptions
+</code></pre></div>
+<p>These are the region names in the compiled <code>CanvasLayout.regions</code> dict. The path
+structure preserves the type hierarchy — you can always reconstruct what type a
+region came from by parsing its path.</p>
+<p>Wildcards (<code>[*]</code>) are supported in topology declarations and query methods, not
+as literal region names in the layout.</p>
+<h2 id="5-layout-strategies">5. Layout Strategies<a class="headerlink" href="#5-layout-strategies" title="Permanent link">&para;</a></h2>
+<p>This is the critical design decision. Given a type hierarchy, how do you map it
+onto a (T, H, W) grid?</p>
+<h3 id="51-packed-default">5.1 Packed (default)<a class="headerlink" href="#51-packed-default" title="Permanent link">&para;</a></h3>
+<p>Each type instance gets a contiguous rectangular subvolume. Array elements are
+stacked along one axis. The grid is a rectangular bin-packing of all regions.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>┌─────────────────────────────────┐
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>│ company.thought  │ company.goal │   Company's own fields
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>├──────────────────┼──────────────┤
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>│ emp[0].thought   │ emp[0].goal  │   Employee instances stacked
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>│ emp[0].role      │              │   along H axis
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>├──────────────────┼──────────────┤
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>│ emp[1].thought   │ emp[1].goal  │
+<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>│ emp[1].role      │              │
+<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>├──────────────────┼──────────────┤
+<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a>│ ...              │              │
+<a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a>├──────────────────┼──────────────┤
+<a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a>│ prod[0].desc     │ prod[0].feat │   Products stacked below
+<a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a>│ prod[1].desc     │ prod[1].feat │
+<a id="__codelineno-8-14" name="__codelineno-8-14" href="#__codelineno-8-14"></a>└──────────────────┴──────────────┘
+</code></pre></div>
+<p><strong>Pro</strong>: Clean separation. Each instance is a self-contained subgrid. Easy to
+reason about. Good for architectures with local attention (nearby positions
+within an instance attend strongly; cross-instance requires explicit connections).</p>
+<p><strong>Con</strong>: Company.thought and Employee[i].thought are far apart on the grid.
+The pretrained model's spatial priors don't help bridge them — you rely entirely
+on explicit cross-attention connections.</p>
+<p><strong>When to use</strong>: Default. Most architectures. Especially when using full
+attention (no spatial bias) or when instances should be relatively independent.</p>
+<h3 id="52-interleaved-field-affinity">5.2 Interleaved (field-affinity)<a class="headerlink" href="#52-interleaved-field-affinity" title="Permanent link">&para;</a></h3>
+<p>Same-named fields across the hierarchy are spatially co-located. All "thought"
+vectors live in one grid region, all "goal" vectors in another.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>┌─────────────────────────────────────────┐
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>│ co.thought │ e[0].thought │ e[1].thought│ ... │   All thoughts together
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>├─────────────────────────────────────────┤
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>│ co.goal    │ e[0].goal    │ e[1].goal   │ ... │   All goals together
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>├─────────────────────────────────────────┤
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>│            │ e[0].role    │ e[1].role   │ ... │   Employee-only fields
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>├─────────────────────────────────────────┤
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>│ p[0].desc  │ p[1].desc    │ ...         │     │   Product fields
+<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a>│ p[0].feat  │ p[1].feat    │ ...         │     │
+<a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a>└─────────────────────────────────────────┘
+</code></pre></div>
+<p><strong>Pro</strong>: Company.thought is spatially adjacent to Employee[i].thought. For a
+pretrained video model with spatial attention priors, adjacent positions already
+have strong attention — you get parent-child coupling "for free" via spatial
+locality. No explicit cross-attention needed for the pretrained backbone to
+transfer information between a company and its employees' thoughts.</p>
+<p><strong>Con</strong>: Employee[i] is no longer a contiguous block — its fields are scattered
+across the grid. Harder to extract a single instance's full state. Within-instance
+coherence relies on explicit connections rather than spatial locality.</p>
+<p><strong>When to use</strong>: When the semantic relationship between parent and child fields
+is the dominant information flow. Multi-agent systems where the group-level
+field and individual-level field need tight coupling. When using a pretrained
+model whose spatial priors you want to exploit.</p>
+<p>This is the user's insight: "map each company latent region directly to each
+individual employee latent region." The intuition is that the latent dynamics
+of a company's thought and its employees' thoughts are fundamentally
+correlated — they should be close in latent space because they're close in
+semantic space.</p>
+<h3 id="53-mirrored-overlapping-union">5.3 Mirrored (overlapping / union)<a class="headerlink" href="#53-mirrored-overlapping-union" title="Permanent link">&para;</a></h3>
+<p>Parent and child fields share the SAME grid positions. Company.thought and
+Employee[0..9].thought all alias to the same latent subvolume. The diffusion
+process resolves them into a shared representation.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>┌─────────────────────────────────┐
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>│ co.thought = e[*].thought       │  SAME positions, multiple writers
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>├─────────────────────────────────┤
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>│ co.goal = e[*].goal             │  SAME positions
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>├─────────────────────────────────┤
+<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>│ e[0].role │ e[1].role │ ...     │  Instance-specific (not shared)
+<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a>├─────────────────────────────────┤
+<a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a>│ p[0].desc │ p[1].desc │ ...     │  Products (not shared)
+<a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a>└─────────────────────────────────┘
+</code></pre></div>
+<p><strong>Pro</strong>: Maximal coupling. The model is forced to learn a shared representation
+that serves both company-level and employee-level semantics. Zero overhead for
+parent-child communication — it's literally the same latent state. Extreme
+parameter efficiency.</p>
+<p><strong>Con</strong>: Employees can't have independent thoughts — they're all writing to
+the same positions. Only works when the semantic role is genuinely shared
+(e.g., team consensus, broadcast state). Destroys individuality.</p>
+<p><strong>When to use</strong>: Broadcast regions. Shared task descriptions. Consensus state
+in multi-agent systems. The "shared_task" pattern from existing topology
+constructors is exactly this.</p>
+<h3 id="54-per-instance-instance-affinity">5.4 Per-instance (instance-affinity)<a class="headerlink" href="#54-per-instance-instance-affinity" title="Permanent link">&para;</a></h3>
+<p>Array elements are stacked, but within each element, fields are co-located.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>┌──────────────────────┐
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>│ e[0].thought │ e[0].goal │ e[0].role │   Instance 0 contiguous
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>├──────────────────────┤
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>│ e[1].thought │ e[1].goal │ e[1].role │   Instance 1 contiguous
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>├──────────────────────┤
+<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>│ ...                  │
+<a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a>├──────────────────────┤
+<a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a>│ co.thought │ co.goal │                   Company fields separate
+<a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a>└──────────────────────┘
+</code></pre></div>
+<p><strong>Pro</strong>: Each instance is a coherent entity. Spatial locality favors within-
+instance coherence. Good when instances are relatively autonomous and
+internal state coherence matters more than cross-instance communication.</p>
+<p><strong>Con</strong>: Cross-instance communication (e.g., employee coordination) requires
+long-range attention. Parent-child coupling is also long-range.</p>
+<p><strong>When to use</strong>: Autonomous agents with rich internal state. Robots that need
+tight sensorimotor coupling within each body but loose coordination between
+bodies.</p>
+<h3 id="55-hybrid-user-specified">5.5 Hybrid / User-specified<a class="headerlink" href="#55-hybrid-user-specified" title="Permanent link">&para;</a></h3>
+<p>The user can override the layout strategy per-field or per-array:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">Company</span><span class="p">(</span><span class="n">Agent</span><span class="p">):</span>
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>    <span class="n">employees</span><span class="p">:</span> <span class="n">Array</span><span class="p">[</span><span class="n">Employee</span><span class="p">,</span> <span class="mi">10</span><span class="p">]</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span>
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>        <span class="n">layout</span><span class="o">=</span><span class="n">ArrayLayout</span><span class="o">.</span><span class="n">INTERLEAVED</span><span class="p">,</span>  <span class="c1"># thoughts co-located with company.thought</span>
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>        <span class="n">fields_interleaved</span><span class="o">=</span><span class="p">[</span><span class="s2">"thought"</span><span class="p">,</span> <span class="s2">"goal"</span><span class="p">],</span>  <span class="c1"># only these fields interleave</span>
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>        <span class="c1"># role stays packed within each instance</span>
+<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>    <span class="p">)</span>
+<a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a>    <span class="n">products</span><span class="p">:</span> <span class="n">Array</span><span class="p">[</span><span class="n">Product</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span>
+<a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a>        <span class="n">layout</span><span class="o">=</span><span class="n">ArrayLayout</span><span class="o">.</span><span class="n">PACKED</span><span class="p">,</span>  <span class="c1"># products stay packed (independent)</span>
+<a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a>    <span class="p">)</span>
+</code></pre></div>
+<h2 id="6-connectivity-policies">6. Connectivity Policies<a class="headerlink" href="#6-connectivity-policies" title="Permanent link">&para;</a></h2>
+<p>The type hierarchy implies natural connectivity patterns. The compiler generates
+default connections that can be overridden.</p>
+<h3 id="61-intra-type-policy-fields-within-a-type">6.1 Intra-type policy (fields within a type)<a class="headerlink" href="#61-intra-type-policy-fields-within-a-type" title="Permanent link">&para;</a></h3>
+<p>Controls how fields of the same type instance connect.</p>
+<table>
+<thead>
+<tr>
+<th>Policy</th>
+<th>Meaning</th>
+<th>Use case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>"dense"</code> (default)</td>
+<td>All fields attend to all fields</td>
+<td>General-purpose</td>
+</tr>
+<tr>
+<td><code>"causal_chain"</code></td>
+<td>Fields connected in declaration order</td>
+<td>Sequential processing</td>
+</tr>
+<tr>
+<td><code>"isolated"</code></td>
+<td>Each field self-attends only</td>
+<td>Independent modalities</td>
+</tr>
+<tr>
+<td><code>"star"</code></td>
+<td>First field is hub, rest are spokes</td>
+<td>Central representation + peripherals</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">Robot</span><span class="p">(</span><span class="n">CanvasType</span><span class="p">):</span>
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>    <span class="k">class</span><span class="w"> </span><span class="nc">Meta</span><span class="p">:</span>
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>        <span class="n">intra_connectivity</span> <span class="o">=</span> <span class="s2">"dense"</span>
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>
+<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>    <span class="n">camera</span><span class="p">:</span> <span class="n">Vec</span><span class="p">[</span><span class="mi">144</span><span class="p">]</span>
+<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>    <span class="n">joints</span><span class="p">:</span> <span class="n">Vec</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span>
+<a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a>    <span class="n">action</span><span class="p">:</span> <span class="n">Vec</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span>
+</code></pre></div>
+<h3 id="62-parent-child-policy">6.2 Parent-child policy<a class="headerlink" href="#62-parent-child-policy" title="Permanent link">&para;</a></h3>
+<p>Controls connections between a type and its nested sub-types.</p>
+<table>
+<thead>
+<tr>
+<th>Policy</th>
+<th>Meaning</th>
+<th>Use case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>"matched_fields"</code> (default)</td>
+<td>Parent.X ↔ Child.X for shared field names</td>
+<td>Natural hierarchy</td>
+</tr>
+<tr>
+<td><code>"hub_spoke"</code></td>
+<td>Parent reads from all child fields, children read from parent</td>
+<td>Central coordination</td>
+</tr>
+<tr>
+<td><code>"broadcast"</code></td>
+<td>Parent → all children (one-way)</td>
+<td>Top-down commands</td>
+</tr>
+<tr>
+<td><code>"aggregate"</code></td>
+<td>All children → parent (one-way)</td>
+<td>Bottom-up reporting</td>
+</tr>
+<tr>
+<td><code>"none"</code></td>
+<td>No automatic parent-child connections</td>
+<td>Fully manual</td>
+</tr>
+</tbody>
+</table>
+<p><code>"matched_fields"</code> is the powerful default: if Company has <code>thought</code> and
+Employee has <code>thought</code> (inherited from Agent), the compiler creates
+<code>Connection(src="company.thought", dst="company.employees[i].thought")</code>
+and vice versa for each employee. <strong>The shared field name is the semantic
+link.</strong> This is type-directed connectivity — the type structure determines
+information flow.</p>
+<h3 id="63-array-element-policy">6.3 Array element policy<a class="headerlink" href="#63-array-element-policy" title="Permanent link">&para;</a></h3>
+<p>Controls connections between elements of the same array.</p>
+<table>
+<thead>
+<tr>
+<th>Policy</th>
+<th>Meaning</th>
+<th>Use case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>"isolated"</code> (default)</td>
+<td>Elements don't see each other</td>
+<td>Independent agents</td>
+</tr>
+<tr>
+<td><code>"dense"</code></td>
+<td>Every element sees every element</td>
+<td>Full coordination</td>
+</tr>
+<tr>
+<td><code>"ring"</code></td>
+<td>Each element sees neighbors</td>
+<td>Spatial arrangement</td>
+</tr>
+<tr>
+<td><code>"hub"</code></td>
+<td>Virtual hub region, elements ↔ hub</td>
+<td>Efficient coordination</td>
+</tr>
+<tr>
+<td><code>"matched_fields"</code></td>
+<td>Element[i].X ↔ Element[j].X</td>
+<td>Field-specific cross-talk</td>
+</tr>
+</tbody>
+</table>
+<h3 id="64-cross-level-policy">6.4 Cross-level policy<a class="headerlink" href="#64-cross-level-policy" title="Permanent link">&para;</a></h3>
+<p>Controls whether grandparent connects directly to grandchild, or only through
+the intermediate parent.</p>
+<table>
+<thead>
+<tr>
+<th>Policy</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>"direct"</code></td>
+<td>Skip connections: grandparent directly connects to grandchild</td>
+</tr>
+<tr>
+<td><code>"hierarchical"</code> (default)</td>
+<td>Information flows through intermediate levels only</td>
+</tr>
+</tbody>
+</table>
+<h3 id="65-temporal-policy">6.5 Temporal policy<a class="headerlink" href="#65-temporal-policy" title="Permanent link">&para;</a></h3>
+<p>Controls temporal connectivity for all generated connections.</p>
+<table>
+<thead>
+<tr>
+<th>Policy</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>"dense"</code> (default)</td>
+<td>All timesteps see all timesteps</td>
+</tr>
+<tr>
+<td><code>"causal"</code></td>
+<td>Same-frame self + prev-frame cross</td>
+</tr>
+<tr>
+<td><code>"same_frame"</code></td>
+<td>Same-frame only, no temporal leakage</td>
+</tr>
+</tbody>
+</table>
+<h3 id="66-explicit-overrides">6.6 Explicit overrides<a class="headerlink" href="#66-explicit-overrides" title="Permanent link">&para;</a></h3>
+<p>Any auto-generated connection can be overridden:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">Company</span><span class="p">(</span><span class="n">Agent</span><span class="p">):</span>
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>    <span class="k">class</span><span class="w"> </span><span class="nc">Meta</span><span class="p">:</span>
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>        <span class="n">intra_connectivity</span> <span class="o">=</span> <span class="s2">"dense"</span>
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>        <span class="n">parent_child</span> <span class="o">=</span> <span class="s2">"matched_fields"</span>
+<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a>        <span class="n">temporal</span> <span class="o">=</span> <span class="s2">"causal"</span>
+<a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a>
+<a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a>    <span class="k">class</span><span class="w"> </span><span class="nc">Connections</span><span class="p">:</span>
+<a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a>        <span class="c1"># Override specific edges</span>
+<a id="__codelineno-14-9" name="__codelineno-14-9" href="#__codelineno-14-9"></a>        <span class="p">(</span><span class="s2">"thought"</span><span class="p">,</span> <span class="s2">"employees[*].thought"</span><span class="p">):</span> <span class="p">{</span><span class="s2">"fn"</span><span class="p">:</span> <span class="s2">"gated"</span><span class="p">,</span> <span class="s2">"weight"</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">}</span>
+<a id="__codelineno-14-10" name="__codelineno-14-10" href="#__codelineno-14-10"></a>        <span class="p">(</span><span class="s2">"employees[*].role"</span><span class="p">,</span> <span class="s2">"goal"</span><span class="p">):</span> <span class="p">{</span><span class="s2">"fn"</span><span class="p">:</span> <span class="s2">"perceiver"</span><span class="p">}</span>
+<a id="__codelineno-14-11" name="__codelineno-14-11" href="#__codelineno-14-11"></a>        <span class="c1"># Disable an auto-generated edge</span>
+<a id="__codelineno-14-12" name="__codelineno-14-12" href="#__codelineno-14-12"></a>        <span class="p">(</span><span class="s2">"goal"</span><span class="p">,</span> <span class="s2">"products[*].description"</span><span class="p">):</span> <span class="kc">None</span>
+</code></pre></div>
+<p>And arbitrary additional connections can be declared:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>    <span class="k">class</span><span class="w"> </span><span class="nc">Connections</span><span class="p">:</span>
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>        <span class="c1"># Add a connection the defaults wouldn't create</span>
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>        <span class="p">(</span><span class="s2">"employees[*].thought"</span><span class="p">,</span> <span class="s2">"products[*].description"</span><span class="p">):</span> <span class="p">{</span><span class="s2">"fn"</span><span class="p">:</span> <span class="s2">"cross_attention"</span><span class="p">}</span>
+</code></pre></div>
+<h2 id="7-compilation-pipeline">7. Compilation Pipeline<a class="headerlink" href="#7-compilation-pipeline" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>CanvasType
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>    ↓ (1) Flatten
+<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>List[(path, Vec)]
+<a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a>    ↓ (2) Size computation
+<a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a>Dict[path → n_positions]
+<a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a>    ↓ (3) Packing
+<a id="__codelineno-16-7" name="__codelineno-16-7" href="#__codelineno-16-7"></a>Dict[path → (t0, t1, h0, h1, w0, w1)]
+<a id="__codelineno-16-8" name="__codelineno-16-8" href="#__codelineno-16-8"></a>    ↓ (4) RegionSpec generation
+<a id="__codelineno-16-9" name="__codelineno-16-9" href="#__codelineno-16-9"></a>Dict[path → RegionSpec]
+<a id="__codelineno-16-10" name="__codelineno-16-10" href="#__codelineno-16-10"></a>    ↓ (5) Connectivity generation
+<a id="__codelineno-16-11" name="__codelineno-16-11" href="#__codelineno-16-11"></a>List[Connection]
+<a id="__codelineno-16-12" name="__codelineno-16-12" href="#__codelineno-16-12"></a>    ↓ (6) Assembly
+<a id="__codelineno-16-13" name="__codelineno-16-13" href="#__codelineno-16-13"></a>CanvasSchema
+</code></pre></div>
+<h3 id="step-1-flatten">Step 1: Flatten<a class="headerlink" href="#step-1-flatten" title="Permanent link">&para;</a></h3>
+<p>Walk the type hierarchy depth-first. For arrays, expand each element. Produce
+a flat list of <code>(dotted_path, Vec_config)</code> pairs.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>Company.compile() →
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>  "company.thought"              Vec[64]
+<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a>  "company.goal"                 Vec[32]
+<a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a>  "company.employees[0].thought" Vec[64]
+<a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a>  "company.employees[0].goal"    Vec[32]
+<a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a>  "company.employees[0].role"    Vec[16]
+<a id="__codelineno-17-7" name="__codelineno-17-7" href="#__codelineno-17-7"></a>  "company.employees[1].thought" Vec[64]
+<a id="__codelineno-17-8" name="__codelineno-17-8" href="#__codelineno-17-8"></a>  ... (x10 employees)
+<a id="__codelineno-17-9" name="__codelineno-17-9" href="#__codelineno-17-9"></a>  "company.products[0].description" Vec[48]
+<a id="__codelineno-17-10" name="__codelineno-17-10" href="#__codelineno-17-10"></a>  "company.products[0].features"    Vec[24]
+<a id="__codelineno-17-11" name="__codelineno-17-11" href="#__codelineno-17-11"></a>  ... (x5 products)
+</code></pre></div>
+<p>Total positions: 64 + 32 + 10<em>(64+32+16) + 5</em>(48+24) = 1,576.</p>
+<h3 id="step-2-size-computation">Step 2: Size computation<a class="headerlink" href="#step-2-size-computation" title="Permanent link">&para;</a></h3>
+<p>Sum total positions. Validate against (T, H, W) grid capacity. If the grid is
+too small, raise an error with a suggestion for minimum grid dimensions.</p>
+<h3 id="step-3-packing">Step 3: Packing<a class="headerlink" href="#step-3-packing" title="Permanent link">&para;</a></h3>
+<p>Map each (path, n_positions) to a (t0, t1, h0, h1, w0, w1) bounding box on the
+grid. The packing algorithm depends on the layout strategy:</p>
+<ul>
+<li><strong>Packed</strong>: recursive rectangle packing. Each type instance is a sub-rectangle.
+  Arrays stack along a chosen axis.</li>
+<li><strong>Interleaved</strong>: group by field name, pack each group as a row/column.
+  Shared-name fields from parent and children are placed adjacent.</li>
+<li><strong>Mirrored</strong>: shared fields map to the same bounds. Non-shared fields are
+  packed normally.</li>
+</ul>
+<p>The packer is a pure function: <code>(flattened_fields, T, H, W, strategy) → bounds_map</code>.
+Deterministic. The user can always inspect and override the result.</p>
+<h3 id="step-4-regionspec-generation">Step 4: RegionSpec generation<a class="headerlink" href="#step-4-regionspec-generation" title="Permanent link">&para;</a></h3>
+<p>Convert each (path, bounds, Vec_config) into a <code>RegionSpec</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="n">RegionSpec</span><span class="p">(</span>
+<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>    <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="n">t0</span><span class="p">,</span> <span class="n">t1</span><span class="p">,</span> <span class="n">h0</span><span class="p">,</span> <span class="n">h1</span><span class="p">,</span> <span class="n">w0</span><span class="p">,</span> <span class="n">w1</span><span class="p">),</span>
+<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>    <span class="n">period</span><span class="o">=</span><span class="n">vec_config</span><span class="o">.</span><span class="n">period</span><span class="p">,</span>
+<a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a>    <span class="n">is_output</span><span class="o">=</span><span class="n">vec_config</span><span class="o">.</span><span class="n">is_output</span><span class="p">,</span>
+<a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a>    <span class="n">loss_weight</span><span class="o">=</span><span class="n">vec_config</span><span class="o">.</span><span class="n">loss_weight</span><span class="p">,</span>
+<a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a>    <span class="n">default_attn</span><span class="o">=</span><span class="n">vec_config</span><span class="o">.</span><span class="n">attn</span><span class="p">,</span>
+<a id="__codelineno-18-7" name="__codelineno-18-7" href="#__codelineno-18-7"></a>    <span class="n">semantic_type</span><span class="o">=</span><span class="n">vec_config</span><span class="o">.</span><span class="n">semantic_type</span><span class="p">,</span>
+<a id="__codelineno-18-8" name="__codelineno-18-8" href="#__codelineno-18-8"></a><span class="p">)</span>
+</code></pre></div>
+<h3 id="step-5-connectivity-generation">Step 5: Connectivity generation<a class="headerlink" href="#step-5-connectivity-generation" title="Permanent link">&para;</a></h3>
+<p>Apply the connectivity policies (Section 6) to produce a list of <code>Connection</code>
+objects. The algorithm:</p>
+<ol>
+<li>For each type instance, apply <code>intra_connectivity</code> to generate within-type edges.</li>
+<li>For each parent-child relationship, apply <code>parent_child</code> policy.</li>
+<li>For each array, apply <code>element_connectivity</code> between elements.</li>
+<li>Apply <code>cross_level</code> policy for skip connections.</li>
+<li>Apply <code>temporal</code> policy to all generated connections (setting t_src, t_dst).</li>
+<li>Apply explicit overrides from <code>class Connections</code>.</li>
+<li>Expand wildcards: <code>"employees[*].thought"</code> → per-element connections.</li>
+</ol>
+<h3 id="step-6-assembly">Step 6: Assembly<a class="headerlink" href="#step-6-assembly" title="Permanent link">&para;</a></h3>
+<p>Bundle into <code>CanvasSchema(layout=CanvasLayout(...), topology=CanvasTopology(...))</code>.</p>
+<h2 id="8-the-compile-api">8. The Compile API<a class="headerlink" href="#8-the-compile-api" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="c1"># Basic compilation</span>
+<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a><span class="n">schema</span> <span class="o">=</span> <span class="n">Company</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">T</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">H</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span> <span class="n">W</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span> <span class="n">d_model</span><span class="o">=</span><span class="mi">256</span><span class="p">)</span>
+<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a>
+<a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a><span class="c1"># With overrides</span>
+<a id="__codelineno-19-5" name="__codelineno-19-5" href="#__codelineno-19-5"></a><span class="n">schema</span> <span class="o">=</span> <span class="n">Company</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
+<a id="__codelineno-19-6" name="__codelineno-19-6" href="#__codelineno-19-6"></a>    <span class="n">T</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">H</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span> <span class="n">W</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span> <span class="n">d_model</span><span class="o">=</span><span class="mi">256</span><span class="p">,</span>
+<a id="__codelineno-19-7" name="__codelineno-19-7" href="#__codelineno-19-7"></a>    <span class="n">layout_strategy</span><span class="o">=</span><span class="n">LayoutStrategy</span><span class="o">.</span><span class="n">INTERLEAVED</span><span class="p">,</span>
+<a id="__codelineno-19-8" name="__codelineno-19-8" href="#__codelineno-19-8"></a>    <span class="n">temporal_policy</span><span class="o">=</span><span class="s2">"causal"</span><span class="p">,</span>
+<a id="__codelineno-19-9" name="__codelineno-19-9" href="#__codelineno-19-9"></a><span class="p">)</span>
+<a id="__codelineno-19-10" name="__codelineno-19-10" href="#__codelineno-19-10"></a>
+<a id="__codelineno-19-11" name="__codelineno-19-11" href="#__codelineno-19-11"></a><span class="c1"># Inspect before committing</span>
+<a id="__codelineno-19-12" name="__codelineno-19-12" href="#__codelineno-19-12"></a><span class="n">plan</span> <span class="o">=</span> <span class="n">Company</span><span class="o">.</span><span class="n">plan</span><span class="p">(</span><span class="n">T</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">H</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span> <span class="n">W</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span> <span class="n">d_model</span><span class="o">=</span><span class="mi">256</span><span class="p">)</span>
+<a id="__codelineno-19-13" name="__codelineno-19-13" href="#__codelineno-19-13"></a><span class="nb">print</span><span class="p">(</span><span class="n">plan</span><span class="o">.</span><span class="n">total_positions</span><span class="p">)</span>        <span class="c1"># 1576</span>
+<a id="__codelineno-19-14" name="__codelineno-19-14" href="#__codelineno-19-14"></a><span class="nb">print</span><span class="p">(</span><span class="n">plan</span><span class="o">.</span><span class="n">grid_utilization</span><span class="p">)</span>       <span class="c1"># 0.38 (1576 / 4096)</span>
+<a id="__codelineno-19-15" name="__codelineno-19-15" href="#__codelineno-19-15"></a><span class="nb">print</span><span class="p">(</span><span class="n">plan</span><span class="o">.</span><span class="n">region_summary</span><span class="p">())</span>       <span class="c1"># tabular: path, size, bounds, attn</span>
+<a id="__codelineno-19-16" name="__codelineno-19-16" href="#__codelineno-19-16"></a><span class="nb">print</span><span class="p">(</span><span class="n">plan</span><span class="o">.</span><span class="n">connection_summary</span><span class="p">())</span>   <span class="c1"># tabular: src, dst, fn, temporal</span>
+<a id="__codelineno-19-17" name="__codelineno-19-17" href="#__codelineno-19-17"></a>
+<a id="__codelineno-19-18" name="__codelineno-19-18" href="#__codelineno-19-18"></a><span class="c1"># Override a specific region's placement</span>
+<a id="__codelineno-19-19" name="__codelineno-19-19" href="#__codelineno-19-19"></a><span class="n">plan</span><span class="o">.</span><span class="n">override_bounds</span><span class="p">(</span><span class="s2">"company.thought"</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<a id="__codelineno-19-20" name="__codelineno-19-20" href="#__codelineno-19-20"></a><span class="n">schema</span> <span class="o">=</span> <span class="n">plan</span><span class="o">.</span><span class="n">finalize</span><span class="p">()</span>
+<a id="__codelineno-19-21" name="__codelineno-19-21" href="#__codelineno-19-21"></a>
+<a id="__codelineno-19-22" name="__codelineno-19-22" href="#__codelineno-19-22"></a><span class="c1"># Or just get the low-level objects</span>
+<a id="__codelineno-19-23" name="__codelineno-19-23" href="#__codelineno-19-23"></a><span class="n">layout</span><span class="p">,</span> <span class="n">topology</span> <span class="o">=</span> <span class="n">Company</span><span class="o">.</span><span class="n">compile_raw</span><span class="p">(</span><span class="n">T</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">H</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span> <span class="n">W</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span> <span class="n">d_model</span><span class="o">=</span><span class="mi">256</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="9-worked-examples">9. Worked Examples<a class="headerlink" href="#9-worked-examples" title="Permanent link">&para;</a></h2>
+<h3 id="91-multi-robot-cell">9.1 Multi-Robot Cell<a class="headerlink" href="#91-multi-robot-cell" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">Sensor</span><span class="p">(</span><span class="n">CanvasType</span><span class="p">):</span>
+<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>    <span class="n">camera</span><span class="p">:</span> <span class="n">Vec</span><span class="p">[</span><span class="mi">144</span><span class="p">]</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="n">attn</span><span class="o">=</span><span class="s2">"cross_attention"</span><span class="p">)</span>
+<a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a>    <span class="n">depth</span><span class="p">:</span> <span class="n">Vec</span><span class="p">[</span><span class="mi">144</span><span class="p">]</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="n">attn</span><span class="o">=</span><span class="s2">"cross_attention"</span><span class="p">)</span>
+<a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a>
+<a id="__codelineno-20-5" name="__codelineno-20-5" href="#__codelineno-20-5"></a><span class="k">class</span><span class="w"> </span><span class="nc">Actuator</span><span class="p">(</span><span class="n">CanvasType</span><span class="p">):</span>
+<a id="__codelineno-20-6" name="__codelineno-20-6" href="#__codelineno-20-6"></a>    <span class="n">joints</span><span class="p">:</span> <span class="n">Vec</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="n">attn</span><span class="o">=</span><span class="s2">"linear_attention"</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<a id="__codelineno-20-7" name="__codelineno-20-7" href="#__codelineno-20-7"></a>    <span class="n">gripper</span><span class="p">:</span> <span class="n">Scalar</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="n">loss_weight</span><span class="o">=</span><span class="mf">2.0</span><span class="p">)</span>
+<a id="__codelineno-20-8" name="__codelineno-20-8" href="#__codelineno-20-8"></a>
+<a id="__codelineno-20-9" name="__codelineno-20-9" href="#__codelineno-20-9"></a><span class="k">class</span><span class="w"> </span><span class="nc">Robot</span><span class="p">(</span><span class="n">CanvasType</span><span class="p">):</span>
+<a id="__codelineno-20-10" name="__codelineno-20-10" href="#__codelineno-20-10"></a>    <span class="k">class</span><span class="w"> </span><span class="nc">Meta</span><span class="p">:</span>
+<a id="__codelineno-20-11" name="__codelineno-20-11" href="#__codelineno-20-11"></a>        <span class="n">intra_connectivity</span> <span class="o">=</span> <span class="s2">"dense"</span>
+<a id="__codelineno-20-12" name="__codelineno-20-12" href="#__codelineno-20-12"></a>
+<a id="__codelineno-20-13" name="__codelineno-20-13" href="#__codelineno-20-13"></a>    <span class="n">sensor</span><span class="p">:</span> <span class="n">Sensor</span>
+<a id="__codelineno-20-14" name="__codelineno-20-14" href="#__codelineno-20-14"></a>    <span class="n">actuator</span><span class="p">:</span> <span class="n">Actuator</span>
+<a id="__codelineno-20-15" name="__codelineno-20-15" href="#__codelineno-20-15"></a>    <span class="n">plan</span><span class="p">:</span> <span class="n">Vec</span><span class="p">[</span><span class="mi">32</span><span class="p">]</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="n">attn</span><span class="o">=</span><span class="s2">"mamba"</span><span class="p">)</span>
+<a id="__codelineno-20-16" name="__codelineno-20-16" href="#__codelineno-20-16"></a>
+<a id="__codelineno-20-17" name="__codelineno-20-17" href="#__codelineno-20-17"></a><span class="k">class</span><span class="w"> </span><span class="nc">Cell</span><span class="p">(</span><span class="n">CanvasType</span><span class="p">):</span>
+<a id="__codelineno-20-18" name="__codelineno-20-18" href="#__codelineno-20-18"></a>    <span class="k">class</span><span class="w"> </span><span class="nc">Meta</span><span class="p">:</span>
+<a id="__codelineno-20-19" name="__codelineno-20-19" href="#__codelineno-20-19"></a>        <span class="n">parent_child</span> <span class="o">=</span> <span class="s2">"hub_spoke"</span>
+<a id="__codelineno-20-20" name="__codelineno-20-20" href="#__codelineno-20-20"></a>        <span class="n">temporal</span> <span class="o">=</span> <span class="s2">"causal"</span>
+<a id="__codelineno-20-21" name="__codelineno-20-21" href="#__codelineno-20-21"></a>
+<a id="__codelineno-20-22" name="__codelineno-20-22" href="#__codelineno-20-22"></a>    <span class="n">task</span><span class="p">:</span> <span class="n">Vec</span><span class="p">[</span><span class="mi">64</span><span class="p">]</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="n">is_output</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">attn</span><span class="o">=</span><span class="s2">"cross_attention"</span><span class="p">)</span>
+<a id="__codelineno-20-23" name="__codelineno-20-23" href="#__codelineno-20-23"></a>    <span class="n">robots</span><span class="p">:</span> <span class="n">Array</span><span class="p">[</span><span class="n">Robot</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span>
+<a id="__codelineno-20-24" name="__codelineno-20-24" href="#__codelineno-20-24"></a>        <span class="n">layout</span><span class="o">=</span><span class="n">ArrayLayout</span><span class="o">.</span><span class="n">PACKED</span><span class="p">,</span>
+<a id="__codelineno-20-25" name="__codelineno-20-25" href="#__codelineno-20-25"></a>        <span class="n">element_connectivity</span><span class="o">=</span><span class="s2">"hub"</span><span class="p">,</span>      <span class="c1"># efficient coordination via virtual hub</span>
+<a id="__codelineno-20-26" name="__codelineno-20-26" href="#__codelineno-20-26"></a>    <span class="p">)</span>
+<a id="__codelineno-20-27" name="__codelineno-20-27" href="#__codelineno-20-27"></a>
+<a id="__codelineno-20-28" name="__codelineno-20-28" href="#__codelineno-20-28"></a><span class="n">schema</span> <span class="o">=</span> <span class="n">Cell</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">T</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">H</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">W</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">d_model</span><span class="o">=</span><span class="mi">512</span><span class="p">)</span>
+</code></pre></div>
+<p>Compiled regions:
+- <code>cell.task</code> (64 positions, input-only)
+- <code>cell.robots[0].sensor.camera</code> (144 positions)
+- <code>cell.robots[0].sensor.depth</code> (144 positions)
+- <code>cell.robots[0].actuator.joints</code> (8 positions)
+- <code>cell.robots[0].actuator.gripper</code> (1 position)
+- <code>cell.robots[0].plan</code> (32 positions)
+- ... (x3 robots)
+- <code>cell.robots._hub</code> (auto-generated hub for array coordination)</p>
+<p>Auto-generated connections include:
+- Dense within each Robot (sensor.camera ↔ sensor.depth ↔ actuator.joints ↔ ...)
+- Hub-spoke: cell.task ↔ each robot's fields (parent_child="hub_spoke")
+- Array hub: robots._hub ↔ each robot[i] (element_connectivity="hub")
+- All connections with temporal causal constraints (t_src=0, t_dst=0 for self,
+  t_src=0, t_dst=-1 for cross)</p>
+<h3 id="92-company-interleaved-layout">9.2 Company (interleaved layout)<a class="headerlink" href="#92-company-interleaved-layout" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">Agent</span><span class="p">(</span><span class="n">CanvasType</span><span class="p">):</span>
+<a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a>    <span class="n">thought</span><span class="p">:</span> <span class="n">Vec</span><span class="p">[</span><span class="mi">64</span><span class="p">]</span>
+<a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a>    <span class="n">goal</span><span class="p">:</span> <span class="n">Vec</span><span class="p">[</span><span class="mi">32</span><span class="p">]</span>
+<a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a>
+<a id="__codelineno-21-5" name="__codelineno-21-5" href="#__codelineno-21-5"></a><span class="k">class</span><span class="w"> </span><span class="nc">Employee</span><span class="p">(</span><span class="n">Agent</span><span class="p">):</span>
+<a id="__codelineno-21-6" name="__codelineno-21-6" href="#__codelineno-21-6"></a>    <span class="n">role</span><span class="p">:</span> <span class="n">Vec</span><span class="p">[</span><span class="mi">16</span><span class="p">]</span>
+<a id="__codelineno-21-7" name="__codelineno-21-7" href="#__codelineno-21-7"></a>
+<a id="__codelineno-21-8" name="__codelineno-21-8" href="#__codelineno-21-8"></a><span class="k">class</span><span class="w"> </span><span class="nc">Product</span><span class="p">(</span><span class="n">CanvasType</span><span class="p">):</span>
+<a id="__codelineno-21-9" name="__codelineno-21-9" href="#__codelineno-21-9"></a>    <span class="n">description</span><span class="p">:</span> <span class="n">Vec</span><span class="p">[</span><span class="mi">48</span><span class="p">]</span>
+<a id="__codelineno-21-10" name="__codelineno-21-10" href="#__codelineno-21-10"></a>
+<a id="__codelineno-21-11" name="__codelineno-21-11" href="#__codelineno-21-11"></a><span class="k">class</span><span class="w"> </span><span class="nc">Company</span><span class="p">(</span><span class="n">Agent</span><span class="p">):</span>
+<a id="__codelineno-21-12" name="__codelineno-21-12" href="#__codelineno-21-12"></a>    <span class="k">class</span><span class="w"> </span><span class="nc">Meta</span><span class="p">:</span>
+<a id="__codelineno-21-13" name="__codelineno-21-13" href="#__codelineno-21-13"></a>        <span class="n">parent_child</span> <span class="o">=</span> <span class="s2">"matched_fields"</span>
+<a id="__codelineno-21-14" name="__codelineno-21-14" href="#__codelineno-21-14"></a>
+<a id="__codelineno-21-15" name="__codelineno-21-15" href="#__codelineno-21-15"></a>    <span class="n">employees</span><span class="p">:</span> <span class="n">Array</span><span class="p">[</span><span class="n">Employee</span><span class="p">,</span> <span class="mi">10</span><span class="p">]</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span>
+<a id="__codelineno-21-16" name="__codelineno-21-16" href="#__codelineno-21-16"></a>        <span class="n">layout</span><span class="o">=</span><span class="n">ArrayLayout</span><span class="o">.</span><span class="n">INTERLEAVED</span><span class="p">,</span>
+<a id="__codelineno-21-17" name="__codelineno-21-17" href="#__codelineno-21-17"></a>        <span class="n">fields_interleaved</span><span class="o">=</span><span class="p">[</span><span class="s2">"thought"</span><span class="p">,</span> <span class="s2">"goal"</span><span class="p">],</span>  <span class="c1"># only inherited Agent fields</span>
+<a id="__codelineno-21-18" name="__codelineno-21-18" href="#__codelineno-21-18"></a>        <span class="n">element_connectivity</span><span class="o">=</span><span class="s2">"matched_fields"</span><span class="p">,</span>    <span class="c1"># emp[i].thought sees emp[j].thought</span>
+<a id="__codelineno-21-19" name="__codelineno-21-19" href="#__codelineno-21-19"></a>    <span class="p">)</span>
+<a id="__codelineno-21-20" name="__codelineno-21-20" href="#__codelineno-21-20"></a>    <span class="n">products</span><span class="p">:</span> <span class="n">Array</span><span class="p">[</span><span class="n">Product</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span>
+<a id="__codelineno-21-21" name="__codelineno-21-21" href="#__codelineno-21-21"></a>        <span class="n">layout</span><span class="o">=</span><span class="n">ArrayLayout</span><span class="o">.</span><span class="n">PACKED</span><span class="p">,</span>
+<a id="__codelineno-21-22" name="__codelineno-21-22" href="#__codelineno-21-22"></a>        <span class="n">element_connectivity</span><span class="o">=</span><span class="s2">"isolated"</span><span class="p">,</span>
+<a id="__codelineno-21-23" name="__codelineno-21-23" href="#__codelineno-21-23"></a>    <span class="p">)</span>
+<a id="__codelineno-21-24" name="__codelineno-21-24" href="#__codelineno-21-24"></a>
+<a id="__codelineno-21-25" name="__codelineno-21-25" href="#__codelineno-21-25"></a><span class="n">schema</span> <span class="o">=</span> <span class="n">Company</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">T</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">H</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">W</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">d_model</span><span class="o">=</span><span class="mi">256</span><span class="p">)</span>
+</code></pre></div>
+<p>Interleaved layout result:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>Row 0: company.thought | emp[0].thought | emp[1].thought | ... | emp[9].thought
+<a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a>Row 1: company.goal    | emp[0].goal    | emp[1].goal    | ... | emp[9].goal
+<a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a>Row 2: emp[0].role | emp[1].role | ... | emp[9].role
+<a id="__codelineno-22-4" name="__codelineno-22-4" href="#__codelineno-22-4"></a>Row 3: prod[0].description | prod[1].description | ... | prod[4].description
+</code></pre></div></p>
+<p>The key: Company.thought and Employee[i].thought are <strong>spatially adjacent</strong>.
+A pretrained video model with spatial attention priors will naturally propagate
+information between them. The type system's matched_fields connectivity adds
+explicit connections, but even without them, the layout creates implicit
+coupling via spatial locality.</p>
+<h3 id="93-hierarchical-organization-recursive-nesting">9.3 Hierarchical Organization (recursive nesting)<a class="headerlink" href="#93-hierarchical-organization-recursive-nesting" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">Worker</span><span class="p">(</span><span class="n">Agent</span><span class="p">):</span>
+<a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a>    <span class="n">skill</span><span class="p">:</span> <span class="n">Vec</span><span class="p">[</span><span class="mi">16</span><span class="p">]</span>
+<a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a>
+<a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a><span class="k">class</span><span class="w"> </span><span class="nc">Team</span><span class="p">(</span><span class="n">Agent</span><span class="p">):</span>
+<a id="__codelineno-23-5" name="__codelineno-23-5" href="#__codelineno-23-5"></a>    <span class="n">members</span><span class="p">:</span> <span class="n">Array</span><span class="p">[</span><span class="n">Worker</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span>
+<a id="__codelineno-23-6" name="__codelineno-23-6" href="#__codelineno-23-6"></a>        <span class="n">layout</span><span class="o">=</span><span class="n">ArrayLayout</span><span class="o">.</span><span class="n">INTERLEAVED</span><span class="p">,</span>
+<a id="__codelineno-23-7" name="__codelineno-23-7" href="#__codelineno-23-7"></a>        <span class="n">element_connectivity</span><span class="o">=</span><span class="s2">"dense"</span><span class="p">,</span>     <span class="c1"># team members coordinate</span>
+<a id="__codelineno-23-8" name="__codelineno-23-8" href="#__codelineno-23-8"></a>    <span class="p">)</span>
+<a id="__codelineno-23-9" name="__codelineno-23-9" href="#__codelineno-23-9"></a>
+<a id="__codelineno-23-10" name="__codelineno-23-10" href="#__codelineno-23-10"></a><span class="k">class</span><span class="w"> </span><span class="nc">Division</span><span class="p">(</span><span class="n">Agent</span><span class="p">):</span>
+<a id="__codelineno-23-11" name="__codelineno-23-11" href="#__codelineno-23-11"></a>    <span class="n">teams</span><span class="p">:</span> <span class="n">Array</span><span class="p">[</span><span class="n">Team</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span>
+<a id="__codelineno-23-12" name="__codelineno-23-12" href="#__codelineno-23-12"></a>        <span class="n">layout</span><span class="o">=</span><span class="n">ArrayLayout</span><span class="o">.</span><span class="n">PACKED</span><span class="p">,</span>        <span class="c1"># teams are independent units</span>
+<a id="__codelineno-23-13" name="__codelineno-23-13" href="#__codelineno-23-13"></a>        <span class="n">element_connectivity</span><span class="o">=</span><span class="s2">"hub"</span><span class="p">,</span>       <span class="c1"># lightweight cross-team coordination</span>
+<a id="__codelineno-23-14" name="__codelineno-23-14" href="#__codelineno-23-14"></a>    <span class="p">)</span>
+<a id="__codelineno-23-15" name="__codelineno-23-15" href="#__codelineno-23-15"></a>
+<a id="__codelineno-23-16" name="__codelineno-23-16" href="#__codelineno-23-16"></a><span class="k">class</span><span class="w"> </span><span class="nc">Corporation</span><span class="p">(</span><span class="n">Agent</span><span class="p">):</span>
+<a id="__codelineno-23-17" name="__codelineno-23-17" href="#__codelineno-23-17"></a>    <span class="k">class</span><span class="w"> </span><span class="nc">Meta</span><span class="p">:</span>
+<a id="__codelineno-23-18" name="__codelineno-23-18" href="#__codelineno-23-18"></a>        <span class="n">cross_level</span> <span class="o">=</span> <span class="s2">"hierarchical"</span>      <span class="c1"># no skip connections corp → worker</span>
+<a id="__codelineno-23-19" name="__codelineno-23-19" href="#__codelineno-23-19"></a>
+<a id="__codelineno-23-20" name="__codelineno-23-20" href="#__codelineno-23-20"></a>    <span class="n">divisions</span><span class="p">:</span> <span class="n">Array</span><span class="p">[</span><span class="n">Division</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+<a id="__codelineno-23-21" name="__codelineno-23-21" href="#__codelineno-23-21"></a>
+<a id="__codelineno-23-22" name="__codelineno-23-22" href="#__codelineno-23-22"></a><span class="n">schema</span> <span class="o">=</span> <span class="n">Corporation</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">T</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">H</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span> <span class="n">W</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span> <span class="n">d_model</span><span class="o">=</span><span class="mi">256</span><span class="p">)</span>
+</code></pre></div>
+<p>This compiles to:
+- 2 divisions × 3 teams × 5 workers = 30 workers
+- Each worker: thought(64) + goal(32) + skill(16) = 112 positions
+- Each team overhead: thought(64) + goal(32) = 96 positions
+- Each division overhead: thought(64) + goal(32) = 96 positions
+- Corporation overhead: thought(64) + goal(32) = 96 positions
+- Total: 30<em>112 + 6</em>96 + 2<em>96 + 96 = 4,416 positions
+- Grid: 4</em>64*64 = 16,384 → 27% utilization</p>
+<p>Information flow: Corporation.thought → Division[i].thought → Team[j].thought
+→ Worker[k].thought (hierarchical, no skip connections).</p>
+<h3 id="94-the-layout-strategy-comparison">9.4 The Layout Strategy Comparison<a class="headerlink" href="#94-the-layout-strategy-comparison" title="Permanent link">&para;</a></h3>
+<p>The same logical type with different layout strategies:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">Swarm</span><span class="p">(</span><span class="n">CanvasType</span><span class="p">):</span>
+<a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a>    <span class="n">hive_mind</span><span class="p">:</span> <span class="n">Vec</span><span class="p">[</span><span class="mi">32</span><span class="p">]</span>
+<a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a>    <span class="n">drones</span><span class="p">:</span> <span class="n">Array</span><span class="p">[</span><span class="n">Drone</span><span class="p">,</span> <span class="mi">8</span><span class="p">]</span>
+<a id="__codelineno-24-4" name="__codelineno-24-4" href="#__codelineno-24-4"></a>
+<a id="__codelineno-24-5" name="__codelineno-24-5" href="#__codelineno-24-5"></a><span class="c1"># PACKED: hive_mind is a separate block, drones are stacked</span>
+<a id="__codelineno-24-6" name="__codelineno-24-6" href="#__codelineno-24-6"></a><span class="c1"># Good for: drones as independent units, explicit coordination via connections</span>
+<a id="__codelineno-24-7" name="__codelineno-24-7" href="#__codelineno-24-7"></a>
+<a id="__codelineno-24-8" name="__codelineno-24-8" href="#__codelineno-24-8"></a><span class="c1"># INTERLEAVED: hive_mind.thought adjacent to drone[*].thought</span>
+<a id="__codelineno-24-9" name="__codelineno-24-9" href="#__codelineno-24-9"></a><span class="c1"># Good for: tight hive-mind coupling, pretrained spatial priors help</span>
+<a id="__codelineno-24-10" name="__codelineno-24-10" href="#__codelineno-24-10"></a>
+<a id="__codelineno-24-11" name="__codelineno-24-11" href="#__codelineno-24-11"></a><span class="c1"># MIRRORED: hive_mind.thought === drone[*].thought (same positions)</span>
+<a id="__codelineno-24-12" name="__codelineno-24-12" href="#__codelineno-24-12"></a><span class="c1"># Good for: shared consciousness, forced consensus</span>
+<a id="__codelineno-24-13" name="__codelineno-24-13" href="#__codelineno-24-13"></a>
+<a id="__codelineno-24-14" name="__codelineno-24-14" href="#__codelineno-24-14"></a><span class="c1"># PER_INSTANCE: each drone is a contiguous block, hive_mind separate</span>
+<a id="__codelineno-24-15" name="__codelineno-24-15" href="#__codelineno-24-15"></a><span class="c1"># Good for: rich internal drone state, autonomous operation</span>
+</code></pre></div>
+<h2 id="10-interaction-with-existing-api">10. Interaction with Existing API<a class="headerlink" href="#10-interaction-with-existing-api" title="Permanent link">&para;</a></h2>
+<p>Canvas Types compiles DOWN to existing primitives. No changes needed to
+CanvasLayout, CanvasTopology, Connection, RegionSpec, SpatiotemporalCanvas,
+or any existing code.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a><span class="n">schema</span> <span class="o">=</span> <span class="n">Company</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">T</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">H</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">W</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">d_model</span><span class="o">=</span><span class="mi">256</span><span class="p">)</span>
+<a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a>
+<a id="__codelineno-25-3" name="__codelineno-25-3" href="#__codelineno-25-3"></a><span class="c1"># Everything below works unchanged</span>
+<a id="__codelineno-25-4" name="__codelineno-25-4" href="#__codelineno-25-4"></a><span class="n">canvas</span> <span class="o">=</span> <span class="n">SpatiotemporalCanvas</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">layout</span><span class="p">)</span>
+<a id="__codelineno-25-5" name="__codelineno-25-5" href="#__codelineno-25-5"></a><span class="n">batch</span> <span class="o">=</span> <span class="n">canvas</span><span class="o">.</span><span class="n">create_empty</span><span class="p">(</span><span class="n">batch_size</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<a id="__codelineno-25-6" name="__codelineno-25-6" href="#__codelineno-25-6"></a><span class="n">batch</span> <span class="o">=</span> <span class="n">canvas</span><span class="o">.</span><span class="n">place</span><span class="p">(</span><span class="n">batch</span><span class="p">,</span> <span class="n">thought_embs</span><span class="p">,</span> <span class="s2">"company.thought"</span><span class="p">)</span>
+<a id="__codelineno-25-7" name="__codelineno-25-7" href="#__codelineno-25-7"></a><span class="n">emp_thoughts</span> <span class="o">=</span> <span class="n">canvas</span><span class="o">.</span><span class="n">extract</span><span class="p">(</span><span class="n">batch</span><span class="p">,</span> <span class="s2">"company.employees[3].thought"</span><span class="p">)</span>
+<a id="__codelineno-25-8" name="__codelineno-25-8" href="#__codelineno-25-8"></a><span class="n">weights</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">loss_weight_mask</span><span class="p">(</span><span class="s2">"cuda"</span><span class="p">)</span>
+<a id="__codelineno-25-9" name="__codelineno-25-9" href="#__codelineno-25-9"></a><span class="n">mask</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">topology</span><span class="o">.</span><span class="n">to_attention_mask</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">layout</span><span class="p">)</span>
+<a id="__codelineno-25-10" name="__codelineno-25-10" href="#__codelineno-25-10"></a><span class="n">schema</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="s2">"company_v1.json"</span><span class="p">)</span>
+</code></pre></div>
+<p>The type system is a compile-time abstraction. At runtime, it's all just
+positions, attention masks, and loss weights — exactly what exists today.</p>
+<h2 id="11-type-compatibility-and-transfer">11. Type Compatibility and Transfer<a class="headerlink" href="#11-type-compatibility-and-transfer" title="Permanent link">&para;</a></h2>
+<p>Two CanvasTypes that share an interface (or just share field names with
+compatible semantic embeddings) can transfer latent state between corresponding
+regions.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">Agent</span><span class="p">(</span><span class="n">CanvasType</span><span class="p">):</span>
+<a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a>    <span class="n">thought</span><span class="p">:</span> <span class="n">Vec</span><span class="p">[</span><span class="mi">64</span><span class="p">]</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="n">semantic_type</span><span class="o">=</span><span class="s2">"agent internal state"</span><span class="p">)</span>
+<a id="__codelineno-26-3" name="__codelineno-26-3" href="#__codelineno-26-3"></a>    <span class="n">goal</span><span class="p">:</span> <span class="n">Vec</span><span class="p">[</span><span class="mi">32</span><span class="p">]</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="n">semantic_type</span><span class="o">=</span><span class="s2">"agent goal representation"</span><span class="p">)</span>
+<a id="__codelineno-26-4" name="__codelineno-26-4" href="#__codelineno-26-4"></a>
+<a id="__codelineno-26-5" name="__codelineno-26-5" href="#__codelineno-26-5"></a><span class="k">class</span><span class="w"> </span><span class="nc">Robot</span><span class="p">(</span><span class="n">Agent</span><span class="p">):</span>
+<a id="__codelineno-26-6" name="__codelineno-26-6" href="#__codelineno-26-6"></a>    <span class="n">camera</span><span class="p">:</span> <span class="n">Vec</span><span class="p">[</span><span class="mi">144</span><span class="p">]</span>
+<a id="__codelineno-26-7" name="__codelineno-26-7" href="#__codelineno-26-7"></a>    <span class="n">joints</span><span class="p">:</span> <span class="n">Vec</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span>
+<a id="__codelineno-26-8" name="__codelineno-26-8" href="#__codelineno-26-8"></a>
+<a id="__codelineno-26-9" name="__codelineno-26-9" href="#__codelineno-26-9"></a><span class="k">class</span><span class="w"> </span><span class="nc">SoftwareAgent</span><span class="p">(</span><span class="n">Agent</span><span class="p">):</span>
+<a id="__codelineno-26-10" name="__codelineno-26-10" href="#__codelineno-26-10"></a>    <span class="n">screen</span><span class="p">:</span> <span class="n">Vec</span><span class="p">[</span><span class="mi">256</span><span class="p">]</span>
+<a id="__codelineno-26-11" name="__codelineno-26-11" href="#__codelineno-26-11"></a>    <span class="n">keyboard</span><span class="p">:</span> <span class="n">Vec</span><span class="p">[</span><span class="mi">16</span><span class="p">]</span>
+<a id="__codelineno-26-12" name="__codelineno-26-12" href="#__codelineno-26-12"></a>
+<a id="__codelineno-26-13" name="__codelineno-26-13" href="#__codelineno-26-13"></a><span class="c1"># These share the Agent interface → thought and goal are transferable</span>
+<a id="__codelineno-26-14" name="__codelineno-26-14" href="#__codelineno-26-14"></a><span class="n">Robot</span><span class="o">.</span><span class="n">transfer_map</span><span class="p">(</span><span class="n">SoftwareAgent</span><span class="p">)</span>
+<a id="__codelineno-26-15" name="__codelineno-26-15" href="#__codelineno-26-15"></a><span class="c1"># → {"thought": "thought", "goal": "goal"}</span>
+<a id="__codelineno-26-16" name="__codelineno-26-16" href="#__codelineno-26-16"></a><span class="c1"># with transfer distances from semantic embeddings</span>
+<a id="__codelineno-26-17" name="__codelineno-26-17" href="#__codelineno-26-17"></a>
+<a id="__codelineno-26-18" name="__codelineno-26-18" href="#__codelineno-26-18"></a><span class="c1"># At runtime: extract Robot.thought, inject into SoftwareAgent.thought</span>
+<a id="__codelineno-26-19" name="__codelineno-26-19" href="#__codelineno-26-19"></a><span class="c1"># The matched field names + shared interface = structural subtyping</span>
+</code></pre></div>
+<p>This extends the existing <code>CanvasSchema.compatible_regions()</code> with type-level
+structure. Instead of brute-force pairwise embedding comparison, the type
+hierarchy tells you exactly which regions SHOULD be compatible.</p>
+<h2 id="12-what-this-does-not-do">12. What This Does NOT Do<a class="headerlink" href="#12-what-this-does-not-do" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>No runtime dispatch.</strong> The type system is compile-time only. It produces
+  static schemas. It doesn't route tokens at inference time.</li>
+<li><strong>No dynamic sizing.</strong> Array sizes are fixed at compile time. You can't have
+  "up to 10 employees" — you have exactly 10 (unused slots get empty tokens).</li>
+<li><strong>No automatic encoder/decoder generation.</strong> The type system declares the
+  schema; you still need to build encoders that project raw modalities into
+  the right regions.</li>
+<li><strong>No training loop.</strong> Compilation produces masks and weights. You still
+  write the training loop.</li>
+</ul>
+<h2 id="13-open-questions">13. Open Questions<a class="headerlink" href="#13-open-questions" title="Permanent link">&para;</a></h2>
+<ol>
+<li>
+<p><strong>Packing algorithm.</strong> What's the right bin-packing strategy for 3D grids?
+   Strip packing? Guillotine cuts? Or just row-major with user hints?</p>
+</li>
+<li>
+<p><strong>Temporal field semantics.</strong> Should some fields span all T, others span 1?
+   How does this interact with period? Current thought: <code>Vec[N]</code> spans all T
+   by default; <code>Vec[N].configure(temporal_extent=1)</code> for static fields.</p>
+</li>
+<li>
+<p><strong>Virtual hub regions.</strong> When <code>element_connectivity="hub"</code>, the compiler
+   creates a synthetic hub region. How big should it be? User-specified?
+   Heuristic (e.g., max field size of elements)?</p>
+</li>
+<li>
+<p><strong>Wildcard expansion.</strong> <code>"employees[*].thought"</code> in connectivity declarations
+   expands to per-element connections. With 100 elements, that's 10,000
+   connections. Need efficient mask generation (block-sparse).</p>
+</li>
+<li>
+<p><strong>Visualization.</strong> The compiled schema should be visualizable — showing
+   which grid positions belong to which type path, colored by type, with
+   connections overlaid.</p>
+</li>
+<li>
+<p><strong>Class Meta vs decorators vs kwargs.</strong> What's the most Pythonic API?
+   Django-style Meta classes? Dataclass-style field()? Decorator-based?</p>
+</li>
+</ol>
+<h2 id="14-module-structure">14. Module Structure<a class="headerlink" href="#14-module-structure" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a>canvas_engineering/
+<a id="__codelineno-27-2" name="__codelineno-27-2" href="#__codelineno-27-2"></a>  types.py          # CanvasType, Vec, Array, Scalar, Shared
+<a id="__codelineno-27-3" name="__codelineno-27-3" href="#__codelineno-27-3"></a>  packing.py        # Layout packing algorithms
+<a id="__codelineno-27-4" name="__codelineno-27-4" href="#__codelineno-27-4"></a>  compile.py        # Flatten → Size → Pack → Wire → Assemble
+<a id="__codelineno-27-5" name="__codelineno-27-5" href="#__codelineno-27-5"></a>  # existing files unchanged:
+<a id="__codelineno-27-6" name="__codelineno-27-6" href="#__codelineno-27-6"></a>  canvas.py         # RegionSpec, CanvasLayout, SpatiotemporalCanvas
+<a id="__codelineno-27-7" name="__codelineno-27-7" href="#__codelineno-27-7"></a>  connectivity.py   # Connection, CanvasTopology
+<a id="__codelineno-27-8" name="__codelineno-27-8" href="#__codelineno-27-8"></a>  schema.py         # CanvasSchema
+</code></pre></div>
+<h2 id="15-why-same-repo">15. Why Same Repo<a class="headerlink" href="#15-why-same-repo" title="Permanent link">&para;</a></h2>
+<ol>
+<li>The compilation target IS canvas-engineering's existing primitives.</li>
+<li>It completes the type system claim — layout is the memory model, types are
+   the language.</li>
+<li>Single package, layered API. Low-level users are unaffected. High-level
+   users get the compiler.</li>
+<li>Prevents drift between the type declarations and the layout engine.</li>
+<li>The package stays small — three new files, zero changes to existing code.</li>
+</ol>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["content.code.copy", "content.code.annotate", "navigation.sections", "navigation.expand", "navigation.top", "toc.follow"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>
