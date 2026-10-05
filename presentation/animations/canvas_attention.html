@@ -1,0 +1,638 @@
+<meta charset="utf-8">
+<title>Canvas Attention Flow</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one white stage. The packed canvas block fills the left; the explanation and the
+   simulator inset float on the white space at the right, with no rule between them.
+   Deliberately single-theme: black ink on white paper. */
+:root {
+  --bg: #ffffff;
+  --ink: #141414;
+  --muted: #6d6d6a;
+  --faint: #e6e6e2;
+  --accent: #d9853b;
+  --f-display: "Newsreader", Georgia, "Times New Roman", serif;
+  --f-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  color-scheme: light;
+}
+html, body { height: 100%; }
+@media (min-width: 901px) { body { overflow: hidden; } }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 14px; line-height: 1.5; }
+
+.stage { position: relative; height: 100%; min-height: 520px; overflow: hidden; background: var(--bg); }
+#stage { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+
+.overlay {
+  position: absolute; top: 24px; right: 28px; width: 330px;
+  display: flex; flex-direction: column; gap: 10px; pointer-events: none;
+}
+.overlay > * { pointer-events: auto; }
+.overlay .line i { font-style: italic; }
+.overlay .line { margin: 0; font-family: var(--f-display); font-weight: 500; font-size: 26px; line-height: 1.22; text-wrap: balance; }
+
+
+.sim { position: absolute; right: 28px; bottom: 22px; width: 330px; display: flex; flex-direction: column; gap: 6px; }
+.sim .views { display: grid; grid-template-columns: minmax(0, 1fr) 76px; gap: 8px; align-items: start; }
+#top { display: block; width: 100%; height: auto; aspect-ratio: 4 / 3; max-width: 100%; border: 1px solid var(--ink); background: #f3f3f1; }
+#ego { display: block; width: 76px; height: auto; image-rendering: pixelated; }
+.loading { position: absolute; left: 32px; top: 28px; font-family: var(--f-mono); font-size: 12px; color: var(--muted); }
+
+@media (max-width: 900px) {
+  .stage { height: auto; min-height: 0; overflow: visible; display: flex; flex-direction: column; }
+  #stage { position: relative; height: 56vh; min-height: 320px; }
+  .overlay, .sim { position: static; width: auto; padding: 0 16px; }
+  .overlay { padding-top: 16px; }
+  .sim { padding-bottom: 20px; margin-top: 14px; }
+}
+</style>
+
+<div class="stage">
+  <canvas id="stage" title="Click to pause" aria-label="Line-art 3D block of canvas slices for three robots. Slices are added on the right and the stack scrolls left; arcs and lit blocks show real attention scores from the newest slice to earlier blocks."></canvas>
+  <p class="loading" id="loading">Loading rollout…</p>
+
+  <div class="overlay">
+    <p class="line" id="line" aria-live="polite">Three robots share one canvas, each with its own space to see, feel, think and act.</p>
+  </div>
+
+  <figure class="sim" style="margin:0">
+    <div class="views">
+      <canvas id="top" width="300" height="225" aria-label="Top-down view of the MuJoCo arena with three robots, four cubes and goal pads."></canvas>
+      <canvas id="ego" width="76" height="240" aria-label="Onboard camera frames of robots A, B and C."></canvas>
+    </div>
+  </figure>
+</div>
+
+<script>
+(() => {
+  const DATA = "canvas_attention/assets/";
+  const P = 0.1;           // seconds per canvas tick = the sim's control step, so playback is real time
+  const NVIS = 40;         // slices kept in view
+
+  const KIND = {
+    video:   { pale: "#d9e6f2", strong: "#5f93c4", label: "video" },
+    lidar:   { pale: "#d4ece7", strong: "#3f9c8c", label: "lidar" },
+    proprio: { pale: "#e2edd5", strong: "#78a255", label: "proprio" },
+    touch:   { pale: "#f4dbe2", strong: "#c66a83", label: "touch" },
+    think:   { pale: "#e4ddf1", strong: "#8a75c0", label: "thinking" },
+    move:    { pale: "#f8dcc1", strong: "#d9853b", label: "movement" },
+    manip:   { pale: "#f1cdb0", strong: "#b4612a", label: "manipulator" },
+  };
+  const hex = h => [1, 3, 5].map(k => parseInt(h.slice(k, k + 2), 16));
+  for (const k in KIND) { KIND[k].p = hex(KIND[k].pale); KIND[k].s = hex(KIND[k].strong); }
+  const WHITE = [255, 255, 255], INK = [20, 20, 20];
+  const mix = (a, b, t) => a.map((v, k) => v + (b[k] - v) * t);
+  const rgba = (c, a = 1) => `rgba(${c[0] | 0},${c[1] | 0},${c[2] | 0},${a})`;
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const ss = t => { t = clamp(t, 0, 1); return t * t * (3 - 2 * t); };
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const MONO = "'IBM Plex Mono', ui-monospace, monospace";
+
+  // Story beats, in data ticks. Each one spotlights a single query block of the newest slice.
+  // Text slides on their own clock: SLIDE_S seconds each, fading in and out.
+  // view 0 = top-down (face-on map of the newest slice), 1 = tilted view showing time.
+  const SLIDE_S = 7, FADE_S = 0.9;
+  const SLIDES = [
+    { view: 0, q: null,      s: "Three robots share one canvas, each with its own space to see, feel, think and act." },
+    { view: 0, q: null,      s: "The big squares are each robot's camera, redrawn ten times a second." },
+    { view: 0, q: "A.think", s: "A small thinking region sits at the heart of each robot's space." },
+    { view: 0, q: "B.move",  s: "Two single cells turn that thinking into where to drive and how to move the hand." },
+    { view: 1, q: "C.move",  s: "Every moment adds a new slice, and the past slides away to the left." },
+    { view: 1, q: "A.manip", s: "A robot's hand looks back at what it just felt and saw." },
+    { view: 1, q: "A.manip", s: "Each arc is a similarity score: the query block's vector <i>q</i> dotted with a key block's vector <i>k</i>, scaled by 1/√<i>d</i>." },
+    { view: 1, q: "B.move",  s: "A softmax turns those scores into weights, so the brightest blocks get the most say in what the query reads." },
+    { view: 1, q: "A.think", s: "Thinking can reach back through a robot's own recent past." },
+    { view: 0, q: "C.think", s: "Robots share what they know only through their thinking regions." },
+    { view: 0, q: "C.think", s: "Pairs the design leaves out get a score of −∞, so their weight is exactly zero and they never light up." },
+    { view: 0, q: null,      s: "Who may look at whom is drawn up front, as part of the design." },
+  ];
+
+  // Intro beats build the idea up before the canvas appears. Durations in seconds.
+  const INTRO = [
+    { dur: 6, s: "Start with a single transformer." },
+    { dur: 8, s: "A transformer by itself is powerful, but how can you get a transformer to work with other transformers?" },
+    { dur: 9, s: "You could use text and have them send messages to each other, but this is very computationally expensive." },
+    { dur: 8, s: "Now imagine you put two transformers side by side, and they could attend to each other's internal states." },
+    { dur: 8, s: "Now imagine you had a swarm of 16 transformers working together." },
+  ];
+  const TIMELINE = [...INTRO.map(x => ({ ...x, intro: true, view: 0, q: null })), ...SLIDES.map(x => ({ ...x, dur: SLIDE_S }))];
+  let acc = 0; for (const e of TIMELINE) { e.start = acc; acc += e.dur; }
+  const TOTAL = acc, INTRO_DUR = INTRO.reduce((a, e) => a + e.dur, 0);
+  function timelineAt(c) {
+    const tc = ((c % TOTAL) + TOTAL) % TOTAL;
+    let i = TIMELINE.length - 1; while (TIMELINE[i].start > tc) i--;
+    return { i, local: tc - TIMELINE[i].start, tc };
+  }
+
+  // ---------- stage ----------
+  const cv = document.getElementById("stage"), ctx = cv.getContext("2d");
+  let DPR = 1, CW = 1, CH = 1;
+  function resize() {
+    const r = cv.getBoundingClientRect();
+    DPR = Math.min(2, window.devicePixelRatio || 1);
+    CW = Math.max(1, r.width); CH = Math.max(1, r.height);
+    cv.width = Math.round(CW * DPR); cv.height = Math.round(CH * DPR);
+  }
+  new ResizeObserver(resize).observe(cv); resize();
+
+  let D = null, GRID = null, REG = {}, H = 20, W = 48, N = 1;
+  const topImg = new Image(), egoImg = new Image();
+  let clock = 0, playing = true, curSeg = -1, lastTick = -1, slideFade = 1, reveal = 99;
+  const simEl = document.querySelector(".sim");
+
+  // ---------- camera: oblique projection, time (x) runs exactly horizontal ----------
+  let AX = 0, AZ = -1, BZ = 0, sc = 1, ox = 0, oy = 0, camE = 0, VIS = { top: false, front: false };
+  const P3 = (x, y, z) => [ox + sc * (AX * x + AZ * z), oy + sc * (-y + BZ * z)];
+  let camCur = 0;
+  function setCamera() {
+    const e = ss(camCur); camE = e;
+    AX = e; AZ = lerp(-1, -0.5, e); BZ = lerp(0, 0.34, e);
+    VIS = { top: e > 0.02, front: e > 0.02 };
+    sc = 1; ox = 0; oy = 0;
+    let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
+    for (const x of [-(NVIS - 0.5), 0.5 + 1.2 * e]) for (const y of [-H / 2, H / 2 + 4.5 * e]) for (const z of [-W / 2, W / 2]) {
+      const [a, b] = P3(x, y, z);
+      x0 = Math.min(x0, a); x1 = Math.max(x1, a); y0 = Math.min(y0, b); y1 = Math.max(y1, b);
+    }
+    const narrow = CW < 900;
+    const availW = narrow ? CW - 32 : CW - 400, left = narrow ? 16 : 36;
+    const top = 30, bottom = 54;
+    sc = Math.min(availW / (x1 - x0), (CH - top - bottom) / (y1 - y0));
+    ox = left + availW / 2 - sc * (x0 + x1) / 2;
+    oy = top + (CH - top - bottom) / 2 - sc * (y0 + y1) / 2;
+  }
+
+  // ---------- slice placement: the newest slice extrudes from a fixed write head at x = 0 ----------
+  let f = 0, tNow = 0, frac = 0;
+  const Lx = t => t - f, Rx = t => Math.min(t + 1 - f, 0);
+  const X = t => (Lx(t) + Rx(t)) / 2;   // slice centre
+  const sliceAlpha = t => {
+    const age = f - t;
+    if (t > tNow || age > NVIS) return 0;
+    return clamp((NVIS - age) / 3, 0, 1);
+  };
+  const fogOf = t => clamp((f - t) * 0.016, 0, 0.75);
+  const yC = r => H / 2 - r - 0.5, zC = c => W / 2 - c - 0.5;
+
+  function poly(pts) { ctx.beginPath(); ctx.moveTo(pts[0][0], pts[0][1]); for (let k = 1; k < pts.length; k++) ctx.lineTo(pts[k][0], pts[k][1]); ctx.closePath(); }
+  const seg = (a, b) => { ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); };
+  const topQuad = (t, c) => { const z = zC(c), l = Lx(t), r = Rx(t); return [P3(l, H / 2, z + .5), P3(r, H / 2, z + .5), P3(r, H / 2, z - .5), P3(l, H / 2, z - .5)]; };
+  const frontQuad = (t, rr) => { const y = yC(rr), l = Lx(t), r = Rx(t); return [P3(l, y + .5, W / 2), P3(r, y + .5, W / 2), P3(r, y - .5, W / 2), P3(l, y - .5, W / 2)]; };
+  const mapQuad = (x, r, c) => { const y = yC(r), z = zC(c); return [P3(x, y + .5, z + .5), P3(x, y + .5, z - .5), P3(x, y - .5, z - .5), P3(x, y - .5, z + .5)]; };
+  const cellRGB = (g, fog) => mix(g ? KIND[g.kind].p : WHITE, WHITE, fog);
+
+  function drawSlice(t) {
+    const a = sliceAlpha(t); if (a < 0.01) return;
+    const l = Lx(t), r = Rx(t); if (r - l < 1e-3) return;
+    const fog = fogOf(t);
+    ctx.globalAlpha = a;
+    if (VIS.top) for (let c = 0; c < W; c++) {
+      poly(topQuad(t, c)); ctx.fillStyle = rgba(cellRGB(GRID[0][c], fog), 0.22); ctx.fill();
+    }
+    if (VIS.front) for (let rr = 0; rr < H; rr++) {
+      poly(frontQuad(t, rr)); ctx.fillStyle = rgba(cellRGB(GRID[rr][0], fog), 0.22); ctx.fill();
+    }
+    // hairline cell grid on the history faces, a slightly firmer line between slices
+    ctx.lineWidth = 0.35; ctx.strokeStyle = rgba(INK, 0.05 * (1 - fog)); ctx.beginPath();
+    if (VIS.top) for (let c = 1; c < W; c++) { const z = W / 2 - c; seg(P3(l, H / 2, z), P3(r, H / 2, z)); }
+    if (VIS.front) for (let rr = 1; rr < H; rr++) { const y = H / 2 - rr; seg(P3(l, y, W / 2), P3(r, y, W / 2)); }
+    ctx.stroke();
+    ctx.strokeStyle = rgba(INK, 0.14 * (1 - fog)); ctx.lineWidth = 0.4; ctx.beginPath();
+    if (VIS.top) { seg(P3(l, H / 2, W / 2), P3(l, H / 2, -W / 2)); seg(P3(l, H / 2, W / 2), P3(r, H / 2, W / 2)); seg(P3(l, H / 2, -W / 2), P3(r, H / 2, -W / 2)); }
+    if (VIS.front) { seg(P3(l, H / 2, W / 2), P3(l, -H / 2, W / 2)); seg(P3(l, -H / 2, W / 2), P3(r, -H / 2, W / 2)); }
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+  }
+
+  // each region's history as one translucent prism: heavy edges, faint walls, fading into the past
+  function drawVolumes() {
+    if (camE < 0.02) return;
+    const xo = Lx(tNow - NVIS + 3), xn = 0;
+    const walls = [], edges = [];
+    for (const g of D.regions) {
+      const yt = H / 2 - g.r0, yb = H / 2 - g.r1, zf = W / 2 - g.c0, zb = W / 2 - g.c1;
+      const col = KIND[g.kind].s;
+      const a = P3(xo, yt, zf), b = P3(xn, yt, zf);
+      const wall = ctx.createLinearGradient(a[0], a[1], b[0], b[1]);
+      wall.addColorStop(0, rgba(col, 0)); wall.addColorStop(1, rgba(col, 0.09 * camE));
+      const ink = ctx.createLinearGradient(a[0], a[1], b[0], b[1]);
+      ink.addColorStop(0, rgba(INK, 0)); ink.addColorStop(0.35, rgba(INK, 0.3 * camE)); ink.addColorStop(1, rgba(INK, 0.85 * camE));
+      const q = (y0, z0, y1, z1) => [P3(xo, y0, z0), P3(xn, y0, z0), P3(xn, y1, z1), P3(xo, y1, z1)];
+      walls.push([wall, q(yb, zb, yt, zb)], [wall, q(yb, zb, yb, zf)], [wall, q(yt, zb, yt, zf)], [wall, q(yb, zf, yt, zf)]);
+      edges.push([ink, [[yt, zf], [yt, zb], [yb, zf], [yb, zb]]]);
+    }
+    for (const [fill, pts] of walls) { poly(pts); ctx.fillStyle = fill; ctx.fill(); }
+    ctx.lineWidth = 1.3;
+    for (const [ink, corners] of edges) {
+      ctx.strokeStyle = ink; ctx.beginPath();
+      for (const [y, z] of corners) seg(P3(xo, y, z), P3(xn, y, z));
+      ctx.stroke();
+    }
+  }
+
+  // the newest slice's exposed face: the full territory map
+  // when the canvas first appears, each region draws in after the one before it
+  const regionIn = g => ss((reveal - 0.9 - 0.11 * (g ? g.idx : 0)) / 0.6);
+  function drawMap(xf, fog) {
+    const frameIn = ss(reveal / 0.9);
+    ctx.lineWidth = 0.4;
+    for (let r = 0; r < H; r++) for (let c = 0; c < W; c++) {
+      const g = GRID[r][c];
+      ctx.globalAlpha = g ? regionIn(g) : frameIn;
+      poly(mapQuad(xf, r, c)); ctx.fillStyle = rgba(cellRGB(g, fog), lerp(1, 0.42, camE)); ctx.fill();
+      ctx.strokeStyle = rgba(INK, 0.07); ctx.stroke();
+    }
+    ctx.strokeStyle = rgba(INK, 0.9); ctx.lineWidth = 1.7;
+    for (const g of D.regions) {
+      ctx.globalAlpha = regionIn(g); ctx.beginPath();
+      const pts = [[g.r0, g.c0], [g.r0, g.c1], [g.r1, g.c1], [g.r1, g.c0]].map(([r, c]) => P3(xf, H / 2 - r, W / 2 - c));
+      seg(pts[0], pts[1]); seg(pts[1], pts[2]); seg(pts[2], pts[3]); seg(pts[3], pts[0]);
+      ctx.stroke();
+    }
+    ctx.globalAlpha = frameIn;
+    ctx.lineWidth = 2.4; ctx.beginPath();
+    for (const c of [0, 16, 32, 48]) seg(P3(xf, H / 2, W / 2 - c), P3(xf, -H / 2, W / 2 - c));
+    seg(P3(xf, H / 2, W / 2), P3(xf, H / 2, -W / 2)); seg(P3(xf, -H / 2, W / 2), P3(xf, -H / 2, -W / 2));
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+  }
+
+  function drawLabels() {
+    const xf = 0, a = ss((reveal - 3.2) / 0.8);
+    ctx.globalAlpha = a; ctx.fillStyle = rgba(INK); ctx.textBaseline = "middle";
+    // robot names under each strip
+    ctx.font = `500 12px ${MONO}`; ctx.textAlign = "center";
+    D.robots.forEach((name, i) => { const p = P3(xf, -H / 2, W / 2 - (16 * i + 8)); ctx.fillText(`robot ${name}`, p[0], p[1] + 15); });
+    // region names inside the map, face-on only
+    const fa = 1 - ss(camE * 2.2);
+    if (fa > 0.02) {
+      ctx.globalAlpha = a * fa; ctx.font = `500 ${clamp(sc * 0.55, 9, 13)}px ${MONO}`;
+      for (const g of D.regions) {
+        if ((g.r1 - g.r0) * (g.c1 - g.c0) < 4) continue;
+        const p = P3(xf, H / 2 - (g.r0 + g.r1) / 2, W / 2 - (g.c0 + g.c1) / 2);
+        ctx.fillText(KIND[g.kind].label, p[0], p[1]);
+      }
+    }
+    ctx.globalAlpha = 1; ctx.textBaseline = "alphabetic";
+  }
+
+  function drawTimeAxis() {
+    if (camE < 0.05) return;
+    const o = 34;
+    ctx.globalAlpha = camE; ctx.strokeStyle = rgba(INK); ctx.fillStyle = rgba(INK); ctx.lineWidth = 1;
+    const p0 = P3(-(NVIS - 1), -H / 2, W / 2), p1 = P3(0, -H / 2, W / 2);
+    ctx.beginPath(); ctx.moveTo(p0[0], p1[1] + o); ctx.lineTo(p1[0] + 12, p1[1] + o);
+    ctx.moveTo(p1[0] + 6, p1[1] + o - 4); ctx.lineTo(p1[0] + 12, p1[1] + o); ctx.lineTo(p1[0] + 6, p1[1] + o + 4); ctx.stroke();
+    ctx.font = `400 10.5px ${MONO}`; ctx.textAlign = "center";
+    // ticks at whole seconds of history, sliding with the stack
+    for (let k = 1; k * 10 < NVIS - 2; k++) {
+      const x = -k * 10 * 1, p = P3(x, -H / 2, W / 2);
+      ctx.globalAlpha = camE * 0.75;
+      ctx.beginPath(); ctx.moveTo(p[0], p1[1] + o - 3); ctx.lineTo(p[0], p1[1] + o + 3); ctx.stroke();
+      ctx.fillText(`−${k}.0 s`, p[0], p1[1] + o + 15);
+    }
+    ctx.globalAlpha = camE; ctx.fillText("now", p1[0], p1[1] + o + 15);
+    ctx.globalAlpha = camE; ctx.textAlign = "right"; ctx.fillText("time", p0[0] - 8, p1[1] + o + 4);
+    ctx.globalAlpha = 1;
+  }
+
+  // ---------- attention: real QK^T matches of the spotlight query ----------
+  // lift over uniform attention; full ink at 2x uniform
+  const intensity = (w, n) => clamp(w * n - 1, 0, 1);
+  function bez(p0, p1, p2, p3, u) {
+    const v = 1 - u, a = v * v * v, b = 3 * v * v * u, c = 3 * v * u * u, d = u * u * u;
+    return [0, 1, 2].map(k => a * p0[k] + b * p1[k] + c * p2[k] + d * p3[k]);
+  }
+  function drawCube(x, y, z, rgb, alpha) {
+    const s = 0.5, faces = [];
+    if (VIS.top) faces.push([[x - s, y + s, z + s], [x + s, y + s, z + s], [x + s, y + s, z - s], [x - s, y + s, z - s]]);
+    if (VIS.front) faces.push([[x - s, y + s, z + s], [x + s, y + s, z + s], [x + s, y - s, z + s], [x - s, y - s, z + s]]);
+    faces.push([[x + s, y + s, z + s], [x + s, y + s, z - s], [x + s, y - s, z - s], [x + s, y - s, z + s]]);
+    ctx.setLineDash([2, 1.5]);
+    for (const fc of faces) { poly(fc.map(p => P3(...p))); ctx.fillStyle = rgba(rgb, 0.85 * alpha); ctx.fill(); ctx.strokeStyle = rgba(INK, alpha); ctx.lineWidth = 0.8; ctx.stroke(); }
+    ctx.setLineDash([]);
+  }
+  function keyQuads(dt, r, c) {
+    const t = tNow + dt;
+    if (dt === 0) return { quads: [mapQuad(0, r, c)], hidden: false };
+    const quads = [];
+    if (r === 0 && VIS.top) quads.push(topQuad(t, c));
+    if (c === 0 && VIS.front) quads.push(frontQuad(t, r));
+    return { quads, hidden: !quads.length };
+  }
+  function drawAttention(qname) {
+    const fr = D.frames[tNow % N]; const entry = fr && fr[qname];
+    if (!entry) return;
+    const pulse = slideFade;
+    const [qr, qc] = entry.q, qg = GRID[qr][qc];
+    const xq = 0;
+    const Q = [xq, yC(qr), zC(qc)];
+    // lit keys, every edge, intensity from the softmax weight relative to uniform
+    for (const e of entry.edges) {
+      const g = REG[e.dst];
+      e.keys.forEach(([dt, r, c, w], i) => {
+        const I = intensity(w, e.n); if (I < 0.05) return;
+        const al = pulse * (0.2 + 0.8 * I);
+        const kq = keyQuads(dt, r, c);
+        if (kq.hidden) { drawCube(X(tNow + dt), yC(r), zC(c), KIND[g.kind].s, al); return; }
+        for (const qd of kq.quads) {
+          poly(qd); ctx.globalAlpha = al; ctx.fillStyle = rgba(KIND[g.kind].s); ctx.fill();
+          ctx.strokeStyle = rgba(INK); ctx.lineWidth = i === 0 ? 1.4 : 0.6; ctx.stroke(); ctx.globalAlpha = 1;
+        }
+      });
+    }
+    // an arc to each of the top keys on every edge: weaker logits draw thinner and fainter,
+    // weakest first so the strongest sits on top
+    ctx.lineCap = "round"; ctx.lineJoin = "round";
+    const arcs = [];
+    for (const e of entry.edges) e.keys.forEach((k, i) => arcs.push({ e, k, i, I: intensity(k[3], e.n) }));
+    arcs.sort((a, b) => (b.i - a.i) || (a.I - b.I));
+    for (const { e, k: [dt, r, c], i, I } of arcs) {
+      const g = REG[e.dst], top = i === 0;
+      const K = [dt === 0 ? 0 : X(tNow + dt), yC(r), zC(c)];
+      if (r === 0 && dt !== 0) K[1] = H / 2; else if (c === 0 && dt !== 0) K[2] = W / 2;
+      let C1, C2;
+      if (dt === 0) {
+        const out = 3 + 0.08 * Math.hypot(K[1] - Q[1], K[2] - Q[2]);
+        C1 = [Q[0] + out, Q[1] + 1, Q[2]]; C2 = [K[0] + out, K[1] + 1, K[2]];
+      } else {
+        const lift = 2.2 + 0.35 * -dt + 0.05 * Math.abs(K[2] - Q[2]);
+        C1 = [Q[0] + 2, H / 2 + lift, Q[2]]; C2 = [K[0], H / 2 + lift * 0.8, K[2]];
+      }
+      const pts = []; for (let n = 0; n <= 40; n++) pts.push(P3(...bez(Q, C1, C2, K, n / 40)));
+      ctx.beginPath(); pts.forEach((p, n) => n ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]));
+      if (top) {
+        const wpx = 1.2 + 3 * I;
+        ctx.globalAlpha = pulse; ctx.strokeStyle = "rgba(255,255,255,0.95)"; ctx.lineWidth = wpx + 3.5; ctx.stroke();
+        ctx.globalAlpha = pulse * (0.7 + 0.3 * I); ctx.strokeStyle = rgba(INK); ctx.lineWidth = wpx; ctx.stroke();
+        // the value flows back from key to query
+        const u = 1 - ((clock * 1.4) % 1);
+        if (u > 0.02 && u < 0.98) {
+          const d = P3(...bez(Q, C1, C2, K, u));
+          ctx.globalAlpha = pulse; ctx.beginPath(); ctx.arc(d[0], d[1], 2 + 2.2 * I, 0, Math.PI * 2);
+          ctx.fillStyle = rgba(KIND[g.kind].s); ctx.fill(); ctx.strokeStyle = rgba(INK); ctx.lineWidth = 0.8; ctx.stroke();
+        }
+      } else {
+        ctx.globalAlpha = pulse * (0.06 + 0.5 * I); ctx.strokeStyle = rgba(INK); ctx.lineWidth = 0.5 + 1.6 * I; ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+    }
+    // the query block itself
+    poly(mapQuad(xq, qr, qc));
+    ctx.fillStyle = rgba(KIND[qg.kind].s); ctx.fill();
+    ctx.strokeStyle = rgba(INK); ctx.lineWidth = 2; ctx.stroke();
+  }
+
+  // ---------- overlay ----------
+  const $ = id => document.getElementById(id);
+  function setSegment(i) {
+    curSeg = i; $("line").innerHTML = TIMELINE[i].s;   // slide strings are fixed in this file
+  }
+  function updateOverlay(d) {
+    const tc = $("top").getContext("2d");
+    if (topImg.complete && topImg.naturalWidth) tc.drawImage(topImg, (d % 16) * 300, Math.floor(d / 16) * 225, 300, 225, 0, 0, 300, 225);
+    drawEgo(d);
+  }
+  const egoCv = $("ego"), ectx = egoCv.getContext("2d");
+  function drawEgo(d) {
+    ectx.imageSmoothingEnabled = false;
+    ectx.fillStyle = "#fff"; ectx.fillRect(0, 0, 76, 240);
+    const focus = TIMELINE[curSeg].q ? TIMELINE[curSeg].q[0] : null;
+    D.robots.forEach((n, i) => {
+      const y = i * 80;
+      if (egoImg.complete && egoImg.naturalWidth) ectx.drawImage(egoImg, d * 64, i * 64, 64, 64, 0, y, 76, 76);
+      ectx.strokeStyle = "#141414"; ectx.lineWidth = n === focus ? 3 : 1; ectx.strokeRect(n === focus ? 1.5 : 0.5, y + (n === focus ? 1.5 : 0.5), n === focus ? 73 : 75, n === focus ? 73 : 75);
+      ectx.fillStyle = "#fff"; ectx.fillRect(3, y + 3, 13, 13); ectx.fillStyle = "#141414";
+      ectx.font = `600 10px ${MONO}`; ectx.textAlign = "center"; ectx.textBaseline = "middle"; ectx.fillText(n, 9.5, y + 10);
+    });
+  }
+
+  function render() {
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, CW, CH);
+    if (!D) return;
+    const { i, local, tc } = timelineAt(clock), ent = TIMELINE[i];
+    if (i !== curSeg) setSegment(i);
+    slideFade = ss(local / FADE_S) * ss((ent.dur - local) / FADE_S);
+    $("line").style.opacity = slideFade.toFixed(3);
+    simEl.style.opacity = ss((tc - INTRO_DUR) / 1.5).toFixed(3);
+    if (tc < INTRO_DUR) { drawIntro(tc); return; }
+
+    const mc = tc - INTRO_DUR;   // canvas-phase clock: the rollout restarts when the canvas appears
+    reveal = mc;
+    f = mc / P; tNow = Math.floor(f); frac = f - tNow;
+    const d = tNow % N;
+    setCamera();
+    if (tNow !== lastTick) { lastTick = tNow; updateOverlay(d); }
+    for (let t = tNow - NVIS - 1; t <= tNow; t++) drawSlice(t);
+    drawVolumes();
+    drawMap(0, 0);
+    drawLabels();
+    drawTimeAxis();
+    if (ent.q) drawAttention(ent.q);
+  }
+
+  // ---------- intro: from one transformer to a swarm ----------
+  const LAYERS = 6, TOKS = 6;
+  const hash = (a, b, c) => { const x = Math.sin(a * 12.9898 + b * 78.233 + c * 37.719) * 43758.5453; return x - Math.floor(x); };
+  const TF_PALE = hex("#e4ddf1");
+  function introBox() {
+    const narrow = CW < 900, x0 = narrow ? 16 : 36, x1 = narrow ? CW - 16 : CW - 400, y0 = 40, y1 = CH - 40;
+    return { x0, x1, y0, y1, cx: (x0 + x1) / 2, cy: (y0 + y1) / 2, w: x1 - x0, h: y1 - y0 };
+  }
+  // token i of layer l (0 = bottom) of a transformer
+  const tfPt = (tf, l, i) => [tf.cx - tf.w / 2 + tf.w * (i + 0.5) / TOKS, tf.cy + tf.h / 2 - (l + 0.5) * tf.h / LAYERS];
+  function drawTransformer(tf, t, seed) {
+    if (tf.alpha <= 0.01) return;
+    const lh = tf.h / LAYERS, rad = clamp(tf.w / TOKS * 0.16, 1.2, 4.5);
+    ctx.save(); ctx.globalAlpha = tf.alpha;
+    // internal self-attention between consecutive layers
+    if (tf.act > 0) {
+      for (let l = 0; l < LAYERS - 1; l++) {
+        if (tf.grow * LAYERS < l + 2) break;
+        for (let i = 0; i < TOKS; i++) for (let k = 0; k < 2; k++) {
+          const j = Math.floor(hash(seed, l * 7 + i, k) * TOKS);
+          const w = 0.5 + 0.5 * Math.sin(t * (1.5 + hash(seed, i, l)) + hash(l, i, k) * 6.28);
+          const a = tfPt(tf, l, i), b = tfPt(tf, l + 1, j);
+          ctx.globalAlpha = tf.alpha * tf.act * (0.06 + 0.5 * w * w);
+          ctx.strokeStyle = rgba(INK); ctx.lineWidth = 0.4 + 1.2 * w * w * Math.min(1, tf.w / 120);
+          ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.stroke();
+        }
+      }
+    }
+    // layers stack up from the bottom
+    for (let l = 0; l < LAYERS; l++) {
+      const a = clamp(tf.grow * LAYERS - l, 0, 1); if (a <= 0) continue;
+      const y = tf.cy + tf.h / 2 - (l + 1) * lh + lh * 0.2 + (1 - a) * lh * 0.5;
+      ctx.globalAlpha = tf.alpha * a;
+      ctx.fillStyle = rgba(TF_PALE, 0.75); ctx.strokeStyle = rgba(INK); ctx.lineWidth = Math.min(1.3, tf.w / 90);
+      ctx.beginPath(); ctx.rect(tf.cx - tf.w / 2, y, tf.w, lh * 0.6); ctx.fill(); ctx.stroke();
+      for (let i = 0; i < TOKS; i++) {
+        const p = tfPt(tf, l, i);
+        ctx.beginPath(); ctx.arc(p[0], y + lh * 0.3, rad, 0, Math.PI * 2);
+        ctx.fillStyle = "#fff"; ctx.fill(); ctx.lineWidth = Math.min(1, tf.w / 120); ctx.stroke();
+      }
+    }
+    ctx.restore();
+  }
+  function curve(a, b, bend, alpha, width) {
+    const mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2 - bend;
+    ctx.globalAlpha = alpha; ctx.strokeStyle = rgba(INK); ctx.lineWidth = width;
+    ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.quadraticCurveTo(mx, my, b[0], b[1]); ctx.stroke();
+  }
+  const MESSAGE = "the blue cube is behind the wall, about a metre left of the shelf, and I can't reach it from here";
+  function drawIntro(tc) {
+    const B = introBox();
+    const h = Math.min(B.h * 0.6, 380), w = h * 0.5;
+    const s1 = INTRO[0].dur, s2 = s1 + INTRO[1].dur, s3 = s2 + INTRO[2].dur, s4 = s3 + INTRO[3].dur, s5 = s4 + INTRO[4].dur;
+    const far = Math.min(w * 1.25, B.w * 0.3), near = w * 0.64;
+    // positions of the first two transformers over the intro
+    let off = 0;
+    if (tc >= s1) off = far * ss((tc - s1) / 1.5);
+    if (tc >= s3) off = lerp(far, near, ss((tc - s3 - 0.6) / 1.6));
+    const A = { cx: B.cx - off, cy: B.cy, w, h, alpha: 1, grow: ss(tc / 2.5), act: ss((tc - 2.4) / 1) };
+    const T2 = { cx: B.cx + off, cy: B.cy, w, h, alpha: tc >= s1 ? ss((tc - s1 - 0.3) / 1) : 0, grow: ss((tc - s1 - 0.5) / 2), act: ss((tc - s1 - 2.5) / 1) };
+
+    // ---- swarm: the two morph into a 4x4 grid and fourteen more join ----
+    if (tc >= s4) {
+      const lt = tc - s4, gs = Math.min(B.w, B.h) / 4.3, th = gs * 0.8, tw = th * 0.5;
+      const gx = c => B.cx + (c - 1.5) * gs, gy = r => B.cy + (r - 1.5) * gs;
+      const out = ss((INTRO[4].dur - lt - 0.2) / 1.2);    // the swarm fades as the canvas takes over
+      const m = ss(lt / 2);
+      const tiles = [];
+      for (let r = 0; r < 4; r++) for (let c = 0; c < 4; c++) {
+        const k = r * 4 + c;
+        let tf;
+        if (k === 5) tf = { cx: lerp(A.cx, gx(c), m), cy: lerp(A.cy, gy(r), m), w: lerp(w, tw, m), h: lerp(h, th, m), alpha: out, grow: 1, act: 1 };
+        else if (k === 6) tf = { cx: lerp(T2.cx, gx(c), m), cy: lerp(T2.cy, gy(r), m), w: lerp(w, tw, m), h: lerp(h, th, m), alpha: out, grow: 1, act: 1 };
+        else {
+          const delay = 1.4 + 0.16 * (Math.abs(r - 1) + Math.abs(c - 1.5) + hash(r, c, 3));
+          const a = ss((lt - delay) / 0.5);
+          tf = { cx: gx(c), cy: gy(r), w: tw, h: th, alpha: a * out, grow: ss((lt - delay) / 0.9), act: a };
+        }
+        tiles.push(tf);
+      }
+      // links between neighbouring transformers' internal states
+      const linkA = ss((lt - 2.8) / 1) * out;
+      if (linkA > 0) for (let r = 0; r < 4; r++) for (let c = 0; c < 4; c++) {
+        for (const [dr, dc] of [[0, 1], [1, 0]]) {
+          if (r + dr > 3 || c + dc > 3) continue;
+          const t1 = tiles[r * 4 + c], t2 = tiles[(r + dr) * 4 + c + dc];
+          for (let k = 0; k < 3; k++) {
+            const l1 = Math.floor(hash(r, c, k + dr) * LAYERS), l2 = Math.floor(hash(c, r, k + dc) * LAYERS);
+            const i1 = dc ? TOKS - 1 : Math.floor(hash(k, r, c) * TOKS), i2 = dc ? 0 : Math.floor(hash(c, k, r) * TOKS);
+            const ww = 0.5 + 0.5 * Math.sin(tc * (2 + hash(r, c, k)) + k * 2.1 + r);
+            curve(tfPt(t1, dr ? LAYERS - 1 : l1, i1), tfPt(t2, dr ? 0 : l2, i2), dr ? 0 : gs * 0.08, linkA * (0.08 + 0.55 * ww * ww), 0.4 + 1.4 * ww * ww);
+          }
+        }
+      }
+      tiles.forEach((tf, k) => drawTransformer(tf, tc, k + 1));
+      ctx.globalAlpha = 1;
+      return;
+    }
+
+    // ---- side by side: attention straight between internal states ----
+    if (tc >= s3) {
+      const la = ss((tc - s3 - 1.6) / 1);
+      if (la > 0) for (let l = 0; l < LAYERS; l++) for (let k = 0; k < 3; k++) {
+        const l2 = clamp(l + Math.floor(hash(l, k, 9) * 3) - 1, 0, LAYERS - 1);
+        const i1 = TOKS - 1 - Math.floor(hash(l, k, 1) * 3), i2 = Math.floor(hash(k, l, 2) * 3);
+        const ww = 0.5 + 0.5 * Math.sin(tc * (1.6 + hash(l, k, 4)) + l * 1.3 + k * 2);
+        const a = tfPt(A, l, i1), b = tfPt(T2, l2, i2);
+        curve(a, b, h * 0.06 * (k - 1), la * (0.08 + 0.7 * ww * ww), 0.5 + 2.6 * ww * ww);
+        curve(b, a, -h * 0.05 * (k - 1), la * 0.5 * (0.06 + 0.5 * (1 - ww) * (1 - ww)), 0.4 + 1.6 * (1 - ww) * (1 - ww));
+      }
+    }
+
+    // ---- the text route: decode, write words, re-encode, the long way round ----
+    if (tc >= s2 && tc < s3 + 1.2) {
+      const lt = tc - s2, fade = tc < s3 ? 1 : 1 - ss((tc - s3) / 1.2);
+      const top = A.cy - h / 2 - 34, bot = A.cy + h / 2 + 30, xr = T2.cx + w / 2 + 34;
+      const path = [[A.cx, A.cy - h / 2], [A.cx, top], [xr, top], [xr, bot], [T2.cx, bot], [T2.cx, T2.cy + h / 2]];
+      const lens = []; let L = 0;
+      for (let k = 1; k < path.length; k++) { const d = Math.hypot(path[k][0] - path[k - 1][0], path[k][1] - path[k - 1][1]); lens.push(d); L += d; }
+      const prog = clamp((lt - 0.6) / (INTRO[2].dur - 1.4), 0, 1);
+      ctx.globalAlpha = 0.85 * fade; ctx.strokeStyle = rgba(INK); ctx.lineWidth = 1.2; ctx.setLineDash([5, 5]);
+      ctx.beginPath(); ctx.moveTo(...path[0]); for (let k = 1; k < path.length; k++) ctx.lineTo(...path[k]); ctx.stroke(); ctx.setLineDash([]);
+      // arrow heads at both ends of the route
+      const ah = (x, y, dir) => { ctx.beginPath(); ctx.moveTo(x - 5, y + 6 * dir); ctx.lineTo(x, y); ctx.lineTo(x + 5, y + 6 * dir); ctx.stroke(); };
+      ah(A.cx, top + 1, 1); ah(T2.cx, T2.cy + h / 2 + 2, 1);
+      // the message crawls along the route
+      let dist = prog * L, k = 0; while (k < lens.length - 1 && dist > lens[k]) { dist -= lens[k]; k++; }
+      const u = clamp(dist / lens[k], 0, 1), px = lerp(path[k][0], path[k + 1][0], u), py = lerp(path[k][1], path[k + 1][1], u);
+      ctx.globalAlpha = fade; ctx.fillStyle = rgba(INK); ctx.beginPath(); ctx.arc(px, py, 4, 0, Math.PI * 2); ctx.fill();
+      // words appear one at a time, slowly
+      const words = MESSAGE.split(" "), nw = Math.min(words.length, Math.floor(clamp((lt - 0.4) / 0.42, 0, 99)));
+      const txt = words.slice(0, nw).join(" ");
+      ctx.font = `400 12px ${MONO}`; ctx.textAlign = "left"; ctx.textBaseline = "alphabetic";
+      const maxW = Math.max(160, xr - A.cx - 24), lines = [""];
+      for (const wd of txt.split(" ")) { const tst = lines[lines.length - 1] ? lines[lines.length - 1] + " " + wd : wd; if (ctx.measureText(tst).width > maxW) lines.push(wd); else lines[lines.length - 1] = tst; }
+      const bx = A.cx + 10, by = top - 14 - (lines.length - 1) * 16;
+      lines.forEach((ln, j) => ctx.fillText(ln + (j === lines.length - 1 && nw < words.length ? "▍" : ""), bx, by + j * 16));
+      ctx.font = `500 11px ${MONO}`; ctx.fillStyle = rgba(INK, 0.6);
+      ctx.textAlign = "right"; ctx.fillText("decode to text", A.cx - 8, top + 16);
+      ctx.textAlign = "left"; ctx.fillText("re-read as text", T2.cx + 8, bot - 8);
+      ctx.globalAlpha = 1;
+    }
+
+    // ---- the open question ----
+    if (tc >= s1 && tc < s2 + 0.8) {
+      const qa = ss((tc - s1 - 2) / 1) * (1 - ss((tc - s2) / 0.8));
+      ctx.globalAlpha = qa; ctx.fillStyle = rgba(INK); ctx.font = `500 ${Math.round(h * 0.22)}px ${getComputedStyle(document.documentElement).getPropertyValue("--f-display")}`;
+      ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText("?", B.cx, B.cy);
+      ctx.textBaseline = "alphabetic"; ctx.globalAlpha = 1;
+    }
+    drawTransformer(A, tc, 1);
+    drawTransformer(T2, tc, 2);
+    ctx.globalAlpha = 1;
+  }
+
+  let prev = performance.now();
+  function advance(dt) {
+    clock += dt;
+    // ease the camera toward the current slide's view
+    const tgt = TIMELINE[timelineAt(clock).i].view;
+    camCur += (tgt - camCur) * Math.min(1, dt * 1.8);
+  }
+  function frame(now) {
+    const dt = Math.min(0.05, (now - prev) / 1000); prev = now;
+    if (playing && D) advance(dt);
+    try { render(); } catch (err) {
+      ctx.globalAlpha = 1;
+      const el = document.getElementById("loading"); el.hidden = false; el.textContent = `Render error: ${err.message}`;
+      console.error(err);
+    }
+    requestAnimationFrame(frame);
+  }
+  cv.addEventListener("click", () => { playing = !playing; });
+
+  // Deterministic stepping for offline video export (pipeline/export_mp4.mjs).
+  window.__canvasAttention = {
+    ready: () => !!D && topImg.complete && egoImg.complete,
+    total: () => TOTAL,
+    reset: () => { playing = false; clock = 0; camCur = 0; curSeg = -1; lastTick = -1; },
+    step: dt => { advance(dt); render(); },
+  };
+
+  fetch(DATA + "attention.json").then(r => r.json()).then(data => {
+    D = data; H = D.H; W = D.W; N = D.ticks;
+    GRID = Array.from({ length: H }, () => Array(W).fill(null));
+    D.regions.forEach((g, k) => { g.idx = k; });
+    for (const g of D.regions) { REG[g.name] = g; for (let r = g.r0; r < g.r1; r++) for (let c = g.c0; c < g.c1; c++) GRID[r][c] = g; }
+    topImg.src = DATA + "top_sprite.jpg";
+    topImg.onload = egoImg.onload = () => { lastTick = -1; };
+    egoImg.src = DATA + "ego_sprite.png";
+    const m = D.model;
+    $("loading").hidden = true;
+    // start at the beginning of the intro
+    clock = 0; camCur = 0;
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) playing = false;
+  }).catch(err => { $("loading").textContent = `Could not load the rollout data (${err.message}).`; });
+
+  requestAnimationFrame(frame);
+})();
+</script>
